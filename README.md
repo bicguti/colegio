@@ -11,7 +11,7 @@ Este es el repositorio para alamacenar los archivos del sistema para colegio en 
 * Jquery (FrontEnd) (Javascrytp)
 
 ##Sobre el Autor
-Desarrollador web, móvil, Desktop, etc.(http://www.bicdev.com)
+Desarrollador web, móvil, Desktop, etc.(https://bicguti.github.io)
 
 ##Licencia
 GPL

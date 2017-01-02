@@ -10,13 +10,18 @@ class Area_model extends CI_Model {
 		$query->next_result();
 		return $dato;
 	}
-	
+
 	/*
 		metodo que obtiene unicamente las areas que tienen el estado true
 	*/
 	public function getArea()
 	{
-		$query = $this->db->get_where('AREAS', array('estado_area'=>TRUE));
+		$this->db->select('*');
+		$this->db->from('AREAS');
+		$this->db->where('estado_area', TRUE);
+		$this->db->order_by('nombre_area', 'asc');
+		$query = $this->db->get();
+		//$query = $this->db->get_where('AREAS', array('estado_area'=>TRUE));
 		return $query->result_array();
 	}
 

@@ -28,9 +28,19 @@
                 <td class="text-center"><button name="calendario" class="btn btn-primary" value="2">EDITAR</button></td>
               </tr>
               <tr>
-                <td>Básico y Diversificado</td>
+                <td>Básico y Diversificado Plan Diario</td>
                 <td>Todas las áreas</td>
                 <td class="text-center"><button name="calendario" class="btn btn-primary" value="3">EDITAR</button></td>
+              </tr>
+              <tr>
+                <td>Diversificado Sabatino</td>
+                <td>Todas las áreas</td>
+                <td class="text-center"><button name="calendario" class="btn btn-primary" value="4">EDITAR</button></td>
+              </tr>
+              <tr>
+                <td>Básico por Madurez</td>
+                <td>Todas las áreas</td>
+                <td class="text-center"><button name="calendario" class="btn btn-primary" value="5">EDITAR</button></td>
               </tr>
             </tbody>
           </table>

@@ -1,7 +1,9 @@
 $(document).ready(function() {
-	var server='http://localhost/colegio/index.php/';//esto es la base ir del servidor
-
-
+	//var server='http://localhost/colegio/index.php/';//esto es la base ir del servidor
+	var URLdomain = window.location.host;
+	var protocolo = window.location.protocol;
+	//var url = protocolo+'//'+URLdomain+'/municipio';
+	var server = protocolo+'//'+URLdomain+'/colegio/index.php/';
 
 	$('#deptoresi').change(function() {//evento change para el select con id deptoresi
 		//alert($('#deptoresi').val());
@@ -194,7 +196,7 @@ $(document).ready(function() {
 			else
 			{
 				var url = server + 'grado/buscar_grados';
-				var id = 5;
+				var id = 6;
 				$.ajax({
 					url: url,
 					type: 'GET',

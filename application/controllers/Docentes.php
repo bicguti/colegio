@@ -55,7 +55,7 @@ class Docentes extends CI_Controller {
 			} else {
 				$this->Docente_model->setGuia($persona, $nivel, $grado);
 			}
-			
+
 			$data['msg'] = 'Se a registrado al nuevo docente como guia o títular';
 			$data['titulo'] = 'Mensaje del Sistema';
 			$data['activo'] = '';
@@ -63,8 +63,14 @@ class Docentes extends CI_Controller {
 			$this->load->view('msg/listo', $data);
 			$this->load->view('plantilla/footer');
 		}
-	}
+	}//fin del metodo
 
+	public function buscar_docente_correo()
+	{
+		$docente = $this->input->get('persona');
+		$datos = $this->Docente_model->getDocenteEmail($docente);
+		echo json_encode($datos);
+	}
 }
 
 /* End of file Docentes.php */

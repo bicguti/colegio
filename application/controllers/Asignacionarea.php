@@ -34,7 +34,7 @@ class Asignacionarea extends CI_Controller {
 		$this->form_validation->set_rules('nivel', 'Nivel', 'trim|required');
 		$this->form_validation->set_rules('grados[]', 'Grado', 'trim|required');
 		$this->form_validation->set_message('required','Debe de seleccionar o checkear al menos una opcion del campo %s');
-		
+
 		if ($this->form_validation->run() == FALSE) {
 			$this->index();
 		} else {
@@ -43,9 +43,9 @@ class Asignacionarea extends CI_Controller {
 			$grados = $this->input->post('grados[]');
 
 			$contador = 0;
-			for ($i=0; $i < count($grados); $i++) 
-			{ 
-				for ($j=0; $j < count($area); $j++) 
+			for ($i=0; $i < count($grados); $i++)
+			{
+				for ($j=0; $j < count($area); $j++)
 				{
 					$codigo = $j +1;
 					$valor = $this->Asignacionarea_model->setAsignacionarea($area[$j], $nivel, $grados[$i], $codigo);
@@ -66,19 +66,19 @@ class Asignacionarea extends CI_Controller {
 			$data['activo'] = 'ninguno';
 			$this->load->view('plantilla/header', $data);
 			$this->load->view('msg/listo', $data);
-			$this->load->view('plantilla/footer');	
+			$this->load->view('plantilla/footer');
 		}
 	}
 
 	public function asignacionc()
 	{
-		if (! file_exists(APPPATH.'views/secretaria/nasignacionc.php')) 
+		if (! file_exists(APPPATH.'views/secretaria/nasignacionc.php'))
 		{
 			# si no existe el recurso mostramos el mensaje de erro 404
 			show_404();
 		}
 		$data['carrera'] = $this->Carrera_model->getCarrera();
-		$data['area'] = $this->Area_model->getArea(); 
+		$data['area'] = $this->Area_model->getArea();
 		$dato['titulo'] = 'Nueva asignación - area';
 		$dato['activo'] = 'asignacion area';
 		$this->load->view('plantilla/header', $dato);
@@ -102,16 +102,16 @@ class Asignacionarea extends CI_Controller {
 			$idGradoCarrera = $this->Gradocarrera_model->setGradocarrera($grado, $carrera);
 
 			$contador = 0;
-			for ($i=0; $i < count($area); $i++) 
-			{ 
+			for ($i=0; $i < count($area); $i++)
+			{
 				$codigo = $i+1;
 				$resultado = $this->Asignacionarea_model->setAsignacionareac($area[$i], $idGradoCarrera, $codigo);
-				if ($resultado == 0) 
+				if ($resultado == 0)
 				{
 					$contador++;
-				}	
+				}
 			}
-			if ($contador > 0) 
+			if ($contador > 0)
 			{
 				$data['msg'] = 'Algunas Asignaciones se omitieron porque ya existen';
 			}
@@ -124,9 +124,25 @@ class Asignacionarea extends CI_Controller {
 			$this->load->view('plantilla/header', $dato);
 			$this->load->view('msg/listo', $data);
 			$this->load->view('plantilla/footer');
-			
+
 		}
-	}
+	}//fin del metodo
+
+	/*
+		metodo para buscar todas las áreas asignadas a un nivel y grado
+	*/
+	public function pensum_grado()
+	{
+		$nivel = $this->input->get('nivel');
+		$grado = $this->input->get('grado');
+		if ($nivel == 4) {//para diversificado
+			$carrera = $this->input->get('carrera');
+			$datos = $this->Asignacionarea_model->getAreasPensumC($carrera, $grado);
+		} else {
+			$datos = $this->Asignacionarea_model->getAreasPensum($nivel, $grado);
+		}
+		echo json_encode($datos);
+	}//fin del metodo
 }
 
 /* End of file Asignacionarea.php */

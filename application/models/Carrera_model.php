@@ -65,6 +65,17 @@ where p.id_plan = '.$plan.' and n.id_nivel = '.$nivel);
 	{
 		$this->db->query('call eliminar_carrera('.$carrera.', "'.$estado.'");');
 	}
+	/*
+		metodo para obtene el nombre de una carrera por su id
+	*/
+	public function getNombreCarrera($id)
+	{
+		$this->db->select('c.nombre_carrera');
+		$this->db->from('CARRERA c');
+		$this->db->where('c.id_carrera', $id);
+		$query = $this->db->get();
+		return $query->result_array();
+	}
 }
 
 /* End of file Carrera_model.php */

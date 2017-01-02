@@ -1,7 +1,74 @@
 
 jQuery(document).ready(function() {
+	//toggle `popup` / `inline` mode
+	$.fn.editable.defaults.mode = 'inline';
 
-	var server="http://localhost/colegio/index.php/";//esto es la base ir del servidor
+	//make username editable
+//	$('.username').editable();
+
+	//make status editable
+//	$('.username').editable({
+			/*type: 'select',
+			title: 'Select status',
+			placement: 'right',
+			value: 2,
+			source: [
+					{value: 1, text: 'status 1'},
+					{value: 2, text: 'status 2'},
+					{value: 3, text: 'status 3'}
+			]*/
+			/*
+			//uncomment these lines to send data on server
+			,pk: 1
+			,url: '/post'
+			*/
+	//});
+
+
+	//var server="http://localhost/colegio/index.php/";//esto es la base ir del servidor
+	var URLdomain = window.location.host;
+	var protocolo = window.location.protocol;
+	//var url = protocolo+'//'+URLdomain+'/municipio';
+	var server = protocolo+'//'+URLdomain+'/colegio/index.php/';
+	var cuadro = '';
+	var nivel = '';
+$('.miEvaluacion').click(function(event) {
+	//console.log($(this).data('cuadro'));
+	cuadro = $(this).data('cuadro');
+	nivel = $(this).data('nivel');
+});
+	$('.miEvaluacion').on('click', '.editable-submit', function(event) {
+		//event.preventDefault();
+		var valor = $('.input-sm').val();
+		//var cuadro = $('.miEvaluacion').data('cuadro');
+		//alert(cuadro);
+		//console.log(cuadro);
+		var url = server + 'cuadros/editar_evaluacion';
+		$('.ventana-modal').animate({top: '0%'}, 500);
+		$.ajax({
+			url: url,
+			type: 'POST',
+			data: {nota: valor, cuadro: cuadro, nivel: nivel}
+		})
+		.done(function() {
+			console.log("success");
+		})
+		.fail(function(error) {
+			alert('Lo sentimos parece que ha ocurrido un error al intentar actualizar la información, por favor vueva a intentarlo más tarde!!!');
+			console.log("error");
+			console.log(error);
+		})
+		.always(function(data) {
+			$('.ventana-modal').animate({top: '100%'}, 500);
+			console.log("complete");
+		});//fin del evento ajax
+
+	});//fin del evento on click
+
+	$('.editable-submit').click(function(event) {
+		event.preventDefault();
+		alert('click');
+	});
 
 	$('#repetircontra').keyup(function(e) {
 
@@ -376,7 +443,7 @@ jQuery(document).ready(function() {
 			else
 			{
 				var url = server + 'grado/buscar_grados';
-				var id = 5;
+				var id = 6;
 				$.ajax({
 					url: url,
 					type: 'GET',
@@ -413,8 +480,8 @@ jQuery(document).ready(function() {
 	$('#btn-buscar').click(function(event) {
 		event.preventDefault();
 		var valor = $('#busca-persona').val();
-		var url = server +'docentes/buscar_docente';
-
+		//var url = server +'docentes/buscar_docente';
+		var url = server + 'usuario/buscar_persona_ajax';
 		//$('.ventana-modal').animate({param1: top, '0'}, 500);
 		//$('.fg-carrera').css('display', 'block');
 		if (valor == '')
@@ -427,7 +494,7 @@ jQuery(document).ready(function() {
 		$.ajax({
 			url: url,
 			type: 'GET',
-			data: {persona: valor},
+			data: {apellido: valor},
 		})
 		.done(function() {
 			console.log("success");
@@ -444,10 +511,10 @@ jQuery(document).ready(function() {
 			for(per in json)
 			{
 				html += '<tr>';
-				html += '<td>'+json[per].nombre_persona.toUpperCase()+'</td>';
-				html += '<td>'+json[per].apellidos_persona.toUpperCase()+'</td>';
-				html += '<td>'+json[per].nombre_puesto.toUpperCase()+'</td>';
-				html += '<td><input type="radio" value="'+json[per].id_persona+'" required="required" name="seleccion" /></td>';
+				html += '<td>'+json[per].nombres.toUpperCase()+'</td>';
+				html += '<td>'+json[per].apellidos.toUpperCase()+'</td>';
+				html += '<td>'+json[per].puesto.toUpperCase()+'</td>';
+				html += '<td><input type="radio" value="'+json[per].id+'" required="required" name="seleccion" /></td>';
 				html += '</tr>';
 			}
 			$('#cuerpoTabla').html(html);
@@ -917,7 +984,7 @@ jQuery(document).ready(function() {
 				html += '<tr>';
 				html += '<td class="text-center">'+cont+'</td>';
 				html += '<td>'+json[estudiante].apellidos_estudiante.toUpperCase()+', '+json[estudiante].nombre_estudiante.toUpperCase()+'</td>';
-				html += '<td class="text-center"><button class="btn btn-success btn-editarEst" value="'+json[estudiante].id_estudiante+'">Editar</button></td>';
+				html += '<td class="text-center"><button class="btn btn-success btn-sm btn-editarEst" value="'+json[estudiante].id_estudiante+'">Editar</button></td>';
 				html += '</tr>';
 				cont++;
 			}
@@ -940,13 +1007,78 @@ jQuery(document).ready(function() {
 
 $('tbody').on('click', '.btn-editarEst', function(event) {
 		event.preventDefault();
-		var html = '<div class="form-group">';
-		html += '<label class="col-sm-2 control-label">Nombre</label>	';
-		html += '</div>';
-		$('#form').html();
-		$('.ventana-modal').animate({top:'0'}, 500);
-		alert($(this).val());
+		var idEstudiante = $(this).val();
+		var url = server +'estudiante/buscar_estudianteId';
+		$('.ventana-modal').animate({top:'0'}, 500);//mostrar el mensaje de carga
+		$.ajax({
+			url: url,
+			type: 'GET',
+			data: {id: idEstudiante}
+		}).error(function(error) {
+			console.log('error');
+			console.log(error);
+		}).success(function(data) {
+			var json = JSON.parse(data);
+			var nombre = '';
+			var apellidos = '';
+			var fechaNacimiento = '';
+			var genero = '';
+			var cui = '';
+			var codigo = '';
+			var idEst = '';
+			for (est in json) {
+				nombre = json[est].nombre_estudiante;
+				apellidos = json[est].apellidos_estudiante;
+				fechaNacimiento = json[est].fecha_nac_estudiante;
+				genero = json[est].id_genero;
+				cui = json[est].cui_estudiante;
+				codigo = json[est].codigo_personal_estudiante;
+				idEst = json[est].id_estudiante;
+			}
+			$('input[name="nombres"]').val(nombre);
+			$('input[name="apellidos"]').val(apellidos);
+			//$('input[name="nombres"]').val(nombre);
+			$('input[name="codigo"]').val(codigo);
+			$('input[name="CUI"]').val(cui);
+			$('input[name="fecha_nacimiento"]').val(fechaNacimiento);
+			//$('input[name="genero"]').val(genero);
+			if (genero == 1) {
+					$('#Masculino').prop('checked', true);
+			}else {
+				$('#Femenino').prop('checked', true);
+			}//fin del if else
+			$('#idEst').html('<input type="hidden" name="id" value="'+idEst+'">');
+		});
+		//alert($(this).val());
+		$('#frm-editEst').modal('show');//mostrar el formulario modal con los datos del estudiante
+		$('.ventana-modal').animate({top:'100%'}, 500);//ocultar el mensaje de carga
 	});//fin del evento on
+
+	$('#save-editEst').click(function(event) {
+		event.preventDefault();
+		var url = server +'estudiante/actualizar_estudianteId';
+		var id = $('input[name="id"]').val();
+		var nombre = $('input[name="nombres"]').val();
+		var apellidos = $('input[name="apellidos"]').val();
+		var codigo = $('input[name="codigo"]').val();
+		var cui = $('input[name="CUI"]').val();
+		var nacimiento = $('input[name="fecha_nacimiento"]').val();
+		var genero = $('input:radio[name=genero]:checked').val();
+		console.log(genero);
+		$('.ventana-modal').animate({top:'0'}, 500);//mostrar el mensaje de carga
+		$.ajax({
+			url: url,
+			type: 'POST',
+			data: {id: id, nombre: nombre, apellidos: apellidos, codigo: codigo, cui: cui, nacimiento: nacimiento, genero: genero}
+		}).error(function(error) {
+			console.log('error');
+			console.log(error);
+		}).success(function(data) {
+			console.log(data);
+		});
+		$('.ventana-modal').animate({top:'100%'}, 500);//Ocultar el mensaje de carga
+		$('#frm-editEst').modal('hide');//ocultamos el formulario modal
+	});//fin del evento click
 
 	$('#editarTitulo').change(function() {
 		var valor = $('#editarTitulo option:selected').text();
@@ -1159,7 +1291,7 @@ $('tbody').on('click', '.btn-editarEst', function(event) {
 			}
 			else
 			{
-				id = 5;
+				id = 6;
 			}
 			$('.ventana-modal').animate({top: '0%'}, 500);
 			$.ajax({
@@ -1230,6 +1362,260 @@ $('tbody').on('click', '.btn-editarEst', function(event) {
 		});
 
 	});//fin del evento change
+
+
+	$('#nivelEditCuadro').change(function() {
+		var valor = $(this).val();
+		$('.ventana-modal').animate({top: '0%'}, 500);
+		$('#gradoEditCuadro').html('<option value="">&lt;seleccione&gt;</option>');
+		$('#carrera').css('display', 'none');
+		if (valor == 4)
+		{
+			var url = server + 'carrera/carreras';
+			$.ajax({
+				url: url,
+				type: 'GET',
+				data: {},
+			})
+			.done(function() {
+				console.log("success");
+			})
+			.fail(function() {
+				$('.ventana-modal').animate({top: '100%'}, 500);
+				alert('Upss!!! Lo sentimos a ocurrido un error al intentar recuperar la información del servidor, por favor vuelve a intentarlo más tarde.');
+				console.log("error");
+			})
+			.always(function(data) {
+				var json = JSON.parse(data);
+				var html = '';
+				html = '<option value="">&lt;seleccione&gt;</option>';
+				for(carrera in json)
+				{
+					html += '<option value="'+json[carrera].id_carrera+'">'+json[carrera].nombre_carrera.toUpperCase()+'</option>';
+				}
+				$('#carreraEditCuadro').html(html);
+				$('#carrera').css('display', 'block');
+				$('.ventana-modal').animate({top: '100%'}, 500);
+				console.log("complete");
+			});
+
+		}
+		else
+		{
+			var url = server + 'grado/buscar_grados';
+			$.ajax({
+				url: url,
+				type: 'GET',
+				data: {id: valor},
+			})
+			.done(function() {
+				console.log("success");
+			})
+			.fail(function() {
+				$('.ventana-modal').animate({top: '100%'}, 500);
+				alert('Upss!!! Lo sentimos a ocurrido un error al intentar recuperar la información del servidor, por favor vuelva a intentarlo más tarde.');
+				console.log("error");
+			})
+			.always(function(data) {
+				var json = JSON.parse(data);
+				var html = '';
+				html = '<option value="">&lt;seleccione&gt;</option>';
+				for(grado in json)
+				{
+					html += '<option value="'+json[grado].id_grado+'">'+json[grado].nombre_grado.toUpperCase()+'</option>';
+				}
+				$('#gradoEditCuadro').html(html);
+				$('.ventana-modal').animate({top: '100%'}, 500);
+				console.log("complete");
+			});
+
+		}
+	});//fin del evento change
+
+	$('#carreraEditCuadro').change(function() {
+		var texto = $('#carreraEditCuadro option:selected').text();
+		var url = server + 'grado/buscar_grados';
+		var expresion = new RegExp('PERITO');
+		var expresion2 = new RegExp('MAESTRA');
+
+		if (texto == '<seleccione>')
+		{
+			$('#gradoEditCuadro').html('<option value="">&lt;seleccione&gt;</option>');
+		}
+		else
+		{
+			var id = 0;
+			if (expresion.test(texto) == true || expresion2.test(texto))
+			{
+				id = 4
+			}
+			else
+			{
+				id = 6;
+			}
+			$('.ventana-modal').animate({top: '0%'}, 500);
+			$.ajax({
+				url: url,
+				type: 'GET',
+				data: {id: id},
+			})
+			.done(function() {
+				console.log("success");
+			})
+			.fail(function() {
+				$('.ventana-modal').animate({top: '100%'}, 500);
+				alert('Upss!!! Lo sentimos a ocurrido un error al intentar recuperar la información del servidor, por favor vuelva a intentarlo más tarder.');
+				console.log("error");
+			})
+			.always(function(data) {
+				var json = JSON.parse(data);
+				var html = '';
+				html = '<option value="">&lt;seleccione&gt;</option>';
+				for(grado in json)
+				{
+					html += '<option value="'+json[grado].id_grado+'">'+json[grado].nombre_grado.toUpperCase()+'</option>';
+				}
+				$('#gradoEditCuadro').html(html);
+				$('.ventana-modal').animate({top: '100%'}, 500);
+				console.log("complete");
+			});
+
+		}//fin del if else
+
+	});//fin del evento change
+
+
+	$('#gradoEditCuadro').change(function() {
+		var nivel = $('#nivelEditCuadro').val();
+		var carrera = $('#carreraEditCuadro').val();
+		var grado = $(this).val();
+		var url = server + 'asignacionarea/pensum_grado';
+		$('.ventana-modal').animate({top: '0%'}, 500);
+		$.ajax({
+			url: url,
+			type: 'GET',
+			data: {nivel: nivel, carrera: carrera, grado: grado},
+		})
+		.done(function() {
+			console.log("success");
+		})
+		.fail(function() {
+			$('.ventana-modal').animate({top: '100%'}, 500);
+			alert('Upss!!! Lo sentimos, parece que a ocurrido un error al intentar recuperar la información del servidor, por favor vuelve a intentarlo más tarde.');
+			console.log("error");
+		})
+		.always(function(data) {
+			var json = JSON.parse(data);
+			var html = '';
+			var cont = 1;
+			for(area in json)
+			{
+				html += '<tr>';
+				html += '<td>'+cont+'</td>';
+				html += '<td>'+json[area].nombre_area.toUpperCase()+'</td>';
+				html += '<td> <input type="radio" name="area" required="required" value="'+json[area].id_asignacion_area.toUpperCase()+'"> </td>';
+				html += '</tr>';
+				cont++;
+			}
+			$('#pensumGrado').html(html);
+			$('#tabla').css('display', 'block');
+			$('.ventana-modal').animate({top: '100%'}, 500);
+			console.log("complete");
+		});
+
+	});//fin del evento change
+
+	$('#carreraEditEst').change(function() {
+		var texto = $('#carreraEditEst option:selected').text();
+		var url = server + 'grado/buscar_grados';
+		var expresion = new RegExp('PERITO');
+		var expresion2 = new RegExp('MAESTRA');
+
+		if (texto == '<seleccione>')
+		{
+			$('#gradoEditEst').html('<option value="">&lt;seleccione&gt;</option>');
+		}
+		else
+		{
+			var id = 0;
+			if (expresion.test(texto) == true || expresion2.test(texto))
+			{
+				id = 4
+			}
+			else
+			{
+				id = 6;
+			}
+			$('.ventana-modal').animate({top: '0%'}, 500);
+			$.ajax({
+				url: url,
+				type: 'GET',
+				data: {id: id},
+			})
+			.done(function() {
+				console.log("success");
+			})
+			.fail(function() {
+				$('.ventana-modal').animate({top: '100%'}, 500);
+				alert('Upss!!! Lo sentimos a ocurrido un error al intentar recuperar la información del servidor, por favor vuelva a intentarlo más tarder.');
+				console.log("error");
+			})
+			.always(function(data) {
+				var json = JSON.parse(data);
+				var html = '';
+				html = '<option value="">&lt;seleccione&gt;</option>';
+				for(grado in json)
+				{
+					html += '<option value="'+json[grado].id_grado+'">'+json[grado].nombre_grado.toUpperCase()+'</option>';
+				}
+				$('#gradoEditEstC').html(html);
+				$('.ventana-modal').animate({top: '100%'}, 500);
+				console.log("complete");
+			});
+
+		}//fin del if else
+
+	});//fin del evento change
+
+	$('#gradoEditEstC').change(function() {
+		var carrera = $('#carreraEditEst').val();
+		var grado = $(this).val();
+		var url = server + 'estudiante/nomina_estudiantesc';
+		$('.ventana-modal').animate({top: '0%'}, 500);
+		$.ajax({
+			url: url,
+			type: 'GET',
+			data: {carrera: carrera, grado: grado},
+		})
+		.done(function() {
+			console.log("success");
+		})
+		.fail(function() {
+			$('.ventana-modal').animate({top: '100%'}, 500);
+			alert('Upss!!! Lo sentimos, parece que a ocurrido un error al intentar recuperar la información del servidor, por favor vuelve a intentarlo más tarde.');
+			console.log("error");
+		})
+		.always(function(data) {
+			var json = JSON.parse(data);
+			var html = '';
+			var cont = 1;
+			for(estudiante in json)
+			{
+				html += '<tr>';
+				html += '<td>'+cont+'</td>';
+				html += '<td>'+json[estudiante].apellidos_estudiante.toUpperCase()+', '+json[estudiante].nombre_estudiante.toUpperCase()+'</td>';
+				html += '<td> <button type="button" name="button" class="btn btn-success btn-sm btn-editarEst" value="'+json[estudiante].id_estudiante+'">EDITAR</button></td>';
+				html += '</tr>';
+				cont++;
+			}
+			$('#nominaEst').html(html);
+			$('#tabla').css('display', 'block');
+			$('.ventana-modal').animate({top: '100%'}, 500);
+			console.log("complete");
+		});
+
+	});//fin del evento change
+
 	$('tbody').on('click', '.quitar-permiso', function(event) {
 		event.preventDefault();
 		var valor = $(this).val();
@@ -1359,5 +1745,65 @@ $('tbody').on('click', '.btn-editarEst', function(event) {
 		event.preventDefault();
 		$('#miFormulario').animate({top: '100%'}, 500);
 	});//fin del evento click
+
+	$('#btn-destinatario').click(function(event) {
+		event.preventDefault();
+		var busca = $('#busqueda').val();
+		var url = server + 'docentes/buscar_docente_correo';
+		$.ajax({
+			url: url,
+			type: 'GET',
+			data: {persona: busca}
+		}).error(function(error) {
+			console.log(error);
+			console.log('Error');
+		}).success(function(data) {
+			var json = JSON.parse(data);
+			var html = '';
+			for(el in json)
+			{
+				html += '<tr id="'+json[el].id_persona +'">';
+				html += '<td>'+json[el].nombre_persona.toUpperCase() + ' ' + json[el].apellidos_persona.toUpperCase()+'</td>';
+				html += '<td>'+json[el].nombre_puesto.toUpperCase() +'</td>';
+				html += '<td> <button type="button" class="btn btn-default btn-sm agr-dest" data-id="'+json[el].id_persona +'" value="'+json[el].correo_electr_persona +'" data-nombre="'+json[el].nombre_persona.toUpperCase() + ' ' + json[el].apellidos_persona.toUpperCase()+'">Agregar Destinatario</button></td>';
+				html += '</tr>';
+			}
+			$('#coincidencias').html(html);
+		});
+
+	});//fin del evento click
+
+$('.form-group').on('click', '.agr-dest', function(event) {
+	event.preventDefault();
+	var nombre = $(this).data('nombre');
+	var correo = $(this).val();
+	var id = $(this).data('id');
+	$('#'+id).empty();
+	var html = '<div class="col-sm-3">';
+	html += '<div class="alert alert-success alert-dismissible" role="alert" style="padding: 6px; padding-right: 30px">';
+	html += '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+	html += '<strong>'+nombre+'</strong>';
+	html += '<input type="hidden" name="correos[]" value="'+correo+'">';
+	html += '</div>';
+	html += '</div>';
+	var aux =	$('#destinatarios');
+	aux.append(html);
+});//fin del evento on para agregar un destinatario en especifico para enviarle el correo
+
+	$('#all-dest').change(function(event) {//evento para ocultar o mostrar la opcion de busqueda de destinatarios para envio de correos
+		event.preventDefault();
+		if ($(this).is(':checked')) {
+			$('#busqueda-destinatario').css({'display': 'none'});
+		}else{
+			$('#busqueda-destinatario').css({'display': 'block'})
+		}//fin del if else
+	});//fin del evento change
+
+	$('#btn-modal').click(function(event) {
+		event.preventDefault();
+		$('#frm-editEst').modal('show');
+	});//fin del evento click
+
+
 
 });//fin del document ready

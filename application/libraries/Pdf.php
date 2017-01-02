@@ -45,7 +45,6 @@ class Pdf extends TCPDF
 		$html .= '</tr>';
 		$html .= '</table>';
 		$this->writeHTMLCell($w = 0, $h = 0, $x = '', $y = '', $html, $border = 0, $ln = 1, $fill = 0, $reseth = true, $align = '', $autopadding = true);
-
 		//$this->Cell(0, 0, 'Pestalozzi '.$this->getAliasNumPage().'/'.$this->getAliasNbPages(), 0, false, 'L', 0, '', 0);
 		//$this->Cell(0, 0, 'Pestalozzi '.$this->getAliasNumPage().'/'.$this->getAliasNbPages(), 0, false, 'C', 0, '', 0);
 		//$this->Cell(0, 0, 'Pestalozzi '.$this->getAliasNumPage().'/'.$this->getAliasNbPages(), 0, false, 'C', 0, '', 0);

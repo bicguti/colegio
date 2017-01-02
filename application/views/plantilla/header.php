@@ -8,10 +8,29 @@
 	<link rel="stylesheet" href="<?=base_url()?>css/mis_estilos.css">
 	<link rel="stylesheet" type="text/css" href="<?=base_url()?>css/jquery-ui.min.css">
 	<link rel="stylesheet" href="<?=base_url()?>css/iconos.css">
-	<script type="text/javascript" src="<?=base_url()?>js/jquery-2.1.4.min.js"></script>
-	<script type="text/javascript" src="<?=base_url()?>js/jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
-	<script type="text/javascript" src="<?=base_url()?>js/backend/script.js"></script>
-	<script type="text/javascript" src= "<?=base_url()?>js/backend/script2.js"></script>
+	<link rel="stylesheet" href="<?=base_url()?>css/bootstrap-editable.css">
+
+	<link rel="apple-touch-icon" sizes="57x57" href="<?=base_url()?>/img/favicon-colegio/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="<?=base_url()?>/img/favicon-colegio/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="<?=base_url()?>/img/favicon-colegio/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="<?=base_url()?>/img/favicon-colegio/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="<?=base_url()?>/img/favicon-colegio/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="<?=base_url()?>/img/favicon-colegio/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="<?=base_url()?>/img/favicon-colegio/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="<?=base_url()?>/img/favicon-colegio/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="<?=base_url()?>/img/favicon-colegio/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" sizes="192x192"  href="<?=base_url()?>/img/favicon-colegio/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="<?=base_url()?>/img/favicon-colegio/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="<?=base_url()?>/img/favicon-colegio/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="<?=base_url()?>/img/favicon-colegio/favicon-16x16.png">
+	<link rel="manifest" href="<?=base_url()?>/img/favicon-colegio/manifest.json">
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage" content="<?=base_url()?>/img/favicon-colegio/ms-icon-144x144.png">
+	<meta name="theme-color" content="#ffffff">
+
+	<!-- DataTables -->
+	<link rel="stylesheet" href="<?=base_url()?>css/dataTables.bootstrap.css">
+	<link rel="stylesheet" href="<?=base_url()?>css/select.bootstrap.css">
 	<!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/
 html5shiv.js"></script>
@@ -294,6 +313,8 @@ respond.min.js"></script>
 		array_push($temp, $aux);
 		$aux = array('opcion'=>'docente guía');
 		array_push($temp, $aux);
+		$aux = array('opcion'=>'enviar correos');
+		array_push($temp, $aux);
 		$aux = array('opcion'=>'primaria - básico');
 		array_push($temp, $aux);
 		$aux = array('opcion'=>'diversificado');
@@ -301,6 +322,8 @@ respond.min.js"></script>
 		$aux = array('opcion'=>'fecha disponibilidad');
 		array_push($temp, $aux);
 		$aux = array('opcion'=>'calendario cuadros');
+		array_push($temp, $aux);
+		$aux = array('opcion'=>'editar cuadros');
 		array_push($temp, $aux);
 		$aux = array('opcion'=>'nueva zona');
 		array_push($temp, $aux);
@@ -320,7 +343,7 @@ respond.min.js"></script>
 		array_push($temp, $aux);
 		$aux = array('opcion'=>'tarjetas de calificaciones');
 		array_push($temp, $aux);
-		$aux = array('opcion'=>'m-h por grado');
+		$aux = array('opcion'=>'tarjetas finales');
 		array_push($temp, $aux);
 		$aux = array('opcion'=>'abanderados y escoltas');
 		array_push($temp, $aux);

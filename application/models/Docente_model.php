@@ -16,6 +16,37 @@ class Docente_model extends CI_Model {
 		$query = $this->db->get();
 		return $query->result_array();
 	}
+
+	/*
+	 metodo que busca a todos los docentes por sus apellidos que esten habilitados para enviarles un email
+	*/
+	public function getDocenteEmail($ape)
+	{
+		$this->db->select('pe.nombre_persona, pe.apellidos_persona, p.nombre_puesto, pe.id_persona, pe.correo_electr_persona');
+		$this->db->from('PERSONA pe');
+		$this->db->join('PUESTO p', 'pe.id_puesto = p.id_puesto', 'inner');
+		$this->db->like('pe.apellidos_persona', $ape, 'after');
+		$this->db->where('p.nombre_puesto', 'docente');
+		$this->db->where('pe.estado_persona', true);
+		$query = $this->db->get();
+		return $query->result_array();
+	}
+
+	/*
+	 metodo que buscar a todos los docentes que esten habilitados para enviarles un email
+	*/
+	public function getAllDocentesEmail()
+	{
+		$this->db->select('pe.nombre_persona, pe.apellidos_persona, p.nombre_puesto, pe.id_persona, pe.correo_electr_persona');
+		$this->db->from('PERSONA pe');
+		$this->db->join('PUESTO p', 'pe.id_puesto = p.id_puesto', 'inner');
+		//$this->db->like('pe.apellidos_persona', $ape, 'after');
+		$this->db->where('p.nombre_puesto', 'docente');
+		$this->db->where('pe.estado_persona', true);
+		$query = $this->db->get();
+		return $query->result_array();
+	}
+
 	/*
 		metodo para agregar un nuevo docente guia o titular de los niveles
 		de pre-primaria, primaria y básico, en la base de datos

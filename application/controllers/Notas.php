@@ -19,34 +19,46 @@ class Notas extends CI_Controller {
 		$anio = date('Y-00-00');
 		$ciclo = date('Y').'-00-00';
 		if ($array[0] == 'diversificado') {
+			//verficamos la existencia de acreditaciones para el nivel diversificado
 			$aux = $this->Puntos_model->existe_notasc($array[1], $fecha);
 		} else {
-			$aux = $this->Puntos_model->existe_notas($array[1], $fecha);
-		}
+			if ($array[0] == 'básico madurez') {
+				//verficamos la existencia de acreditaciones para el nivel básico por madurez
+				$aux = $this->Puntos_model->existe_notasM($array[1], $fecha);
+			}else {
+				$aux = $this->Puntos_model->existe_notas($array[1], $fecha);
+			}//fin del if else
+		}//fin del if else
 
 
-		if (count($aux) == 0) {
+		if (count($aux) == 0) {//verificamos si existe ya existen las acreditaciones de bloque para el área solicitada
 			$data['bandera'] = false;
 			if ($array[0] == 'diversificado') {
 				$cuadros = $this->Puntos_model->findIdCuadrosC($array[1], $fecha, $anio);
 			} else {
-				$cuadros = $this->Puntos_model->findIdCuadros($array[1], $fecha, $anio);
-			}
-
-
+				if ($array[0] == 'básico madurez') {
+					$cuadros = $this->Puntos_model->findIdCuadrosM($array[1], $fecha, $anio);
+				}else {
+					$cuadros = $this->Puntos_model->findIdCuadros($array[1], $fecha, $anio);
+				}
+			}//fin del if else
 
 			$this->session->set_userdata('nivel', $array[0] );
 			$this->session->set_userdata('cuadros', $cuadros);
-		}
-		else{
+		}else{
 			$data['bandera'] = true;
-		}
+		}//fin del if else
 		if ($array[0]=='diversificado') {
 			$data['estudiante'] = $this->Cuadros_model->findEstudiantesC($array[1], $fecha, $ciclo);
 		}
 		else{
-			$data['estudiante'] = $this->Cuadros_model->findEstudiantes($array[1], $fecha, $ciclo);
-		}
+			if ($array[0] == 'básico madurez') {
+				$data['estudiante'] = $this->Cuadros_model->findEstudiantesM($array[1], $fecha, $ciclo);
+			} else {
+				$data['estudiante'] = $this->Cuadros_model->findEstudiantes($array[1], $fecha, $ciclo);
+
+			}//fin del if else
+		}//fin del if else
 
 		$data['activo'] = 'notas';
 		$data['titulo'] = 'Notas Estudiantes';
@@ -77,7 +89,7 @@ class Notas extends CI_Controller {
 			//echo "contenido: ".count($cuadros);
 			$nivel = $_SESSION['nivel'];
 
-
+			//creamos las acreditaciones de bloque
 			$aux = $this->Puntos_model->setNuevaAcreditacion($uno);
 			$temp = array('id'=>$aux);
 			array_push($datos, $temp);
@@ -98,18 +110,31 @@ class Notas extends CI_Controller {
 			array_push($datos, $temp);
 
 			if ($nivel == 'diversificado') {
-				foreach ($cuadros as $value) {
+
 					foreach ($datos as $value2) {
+						foreach ($cuadros as $value) {
 						$this->Puntos_model->setNuevosPuntosC($value['id_cuadros_carreras'], $value2['id']);
-					}
-				}
-			}
-			else {
-				foreach ($cuadros as $value) {
-					foreach ($datos as $value2) {
-						$this->Puntos_model->setNuevosPuntos($value['id_cuadros'], $value2['id']);
+					}//fin del foreach para recorrer el array datos
+				}//fin del foreach para recorrer el array cuadros
+
+			}else {
+				if ($nivel == 'básico madurez') {
+
+					foreach ($cuadros as $value) {
+						foreach ($datos as $value2) {
+							$this->Puntos_model->setNuevosPuntosM($value['id_cuadros_madurez'], $value2['id']);
+						}//fin del foreach
 					}//fin del foreach
-				}//fin del foreach
+
+				}else {
+
+					foreach ($cuadros as $value) {
+						foreach ($datos as $value2) {
+							$this->Puntos_model->setNuevosPuntos($value['id_cuadros'], $value2['id']);
+						}//fin del foreach
+					}//fin del foreach
+
+				}//fin del if else
 
 		}//fin del else
 			$this->session->unset_userdata('cuadros');
@@ -135,7 +160,12 @@ class Notas extends CI_Controller {
 		}
 		else
 		{
-			$datos = $this->Puntos_model->findNotasEstudiante($asignarea, $ciclo, $estudiante, $bloque);
+			if ($nivel == 5) {//para el nivel básico por madurez
+				$datos = $this->Puntos_model->findNotasEstudianteM($asignarea, $ciclo, $estudiante, $bloque);
+			} else {//para el resto de niveles
+				$datos = $this->Puntos_model->findNotasEstudiante($asignarea, $ciclo, $estudiante, $bloque);
+			}//fin del if else
+
 		}
 		echo json_encode($datos);
 	}
@@ -159,12 +189,21 @@ class Notas extends CI_Controller {
 		}
 		else
 		{
-			for ($i=0; $i < 6; $i++) {
-				if ($array2[$i] != '') {
-					$this->Puntos_model->agregar_puntos($array[$i], $array2[$i]);
-				}
-			}
-		}
+			if ($nivel == 5) {//para el nivel básico por madurez
+				for ($i=0; $i < 6; $i++) {
+					if ($array2[$i] != '') {
+						$this->Puntos_model->agregar_puntosM($array[$i], $array2[$i]);
+					}//fin del if
+				}//fin del for
+			} else {//para los demas niveles
+				for ($i=0; $i < 6; $i++) {
+					if ($array2[$i] != '') {
+						$this->Puntos_model->agregar_puntos($array[$i], $array2[$i]);
+					}//fin del if
+				}//fin del for
+			}//fin del if else
+
+		}//fin del if else
 
 	}
 
@@ -216,11 +255,16 @@ class Notas extends CI_Controller {
 			$fecha = date('Y-m-d');
 			$ciclo = date('Y').'-00-00';
 
-			if ($array[0] == 4) {
+			if ($array[0] == 4) {//para los estudiantes de nivel diversificado
 				$data['estudiantes'] = $this->Estudiante_model->getNominaEstudiantesC($array[1], $array[2], $ciclo, $fecha);
 			} else {
-				$data['estudiantes'] = $this->Estudiante_model->getNominaEstudiantes($array[0], $array[1], $ciclo, $fecha);
-			}
+				if ($array[0] == 5) {//para el nivel básico por madurez
+						$data['estudiantes'] = $this->Estudiante_model->getNominaEstudiantesM($array[0], $array[1], $ciclo, $fecha);
+				} else {//para el resto de niveles
+						$data['estudiantes'] = $this->Estudiante_model->getNominaEstudiantes($array[0], $array[1], $ciclo, $fecha);
+				}//fin del if else
+
+			}//fin del if else
 			$data['nivel'] = $array[0];
 			$data['titulo'] = 'Agregar Puntualidad y Hábitos de Estudiante';
 			$data['activo'] = 'notas';
@@ -240,15 +284,21 @@ class Notas extends CI_Controller {
 		$habitos = $this->input->post('habitos');
 
 		$array = explode(',', $estudiante);
-		if ($array[1] == 4) {
+		if ($array[1] == 4) {//para el nivel diversificado
 			for ($i=2; $i < count($array); $i++) {
 			$this->Puntos_model->update_punt_habitosC($array[$i], $puntualidad, $habitos);
-			}
+		}//fin del for
 		} else {
-			for ($i=2; $i < count($array); $i++) {
-			$this->Puntos_model->update_punt_habitos($array[$i], $puntualidad, $habitos);
-			}
-		}
+			if ($array[1] == 5) {//para el nivel básico por madurez
+				for ($i=2; $i < count($array); $i++) {
+						$this->Puntos_model->update_punt_habitosM($array[$i], $puntualidad, $habitos);
+					}//fin del for
+			} else {//para el resto de niveles
+				for ($i=2; $i < count($array); $i++) {
+						$this->Puntos_model->update_punt_habitos($array[$i], $puntualidad, $habitos);
+					}//fin del for
+			}//fin del if else
+		}//fin del if else
 	}//fin del metodo
 
 	/*
@@ -372,7 +422,7 @@ class Notas extends CI_Controller {
 		}//fin del metodo
 
 
-	}
+	}//fin del metodo
 
 }
 

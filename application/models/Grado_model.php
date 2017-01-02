@@ -7,7 +7,7 @@ class Grado_model extends CI_Model {
 		$query = $this->db->get('GRADO');
 		return $query->result_array();
 	}
-	
+
 	public function findPreprimaria()//Selecciona unicamente los grados párvulos y preparatoria
 	{
 		$query = $this->db->query('select* from GRADO where nombre_grado = "párvulos" or nombre_grado = "preparatoria";');
@@ -35,6 +35,22 @@ class Grado_model extends CI_Model {
 		return $query->result_array();
 	}
 
+	/* obtener el nombre de grado por su ID*/
+	public function getNombreGrado($id)
+	{
+		$this->db->select('g.nombre_grado');
+		$this->db->from('GRADO g');
+		$this->db->where('g.id_grado', $id);
+		$query = $this->db->get();
+		return $query->result_array();
+	}
+
+	/*metodo para obtener los grados de básico por madurez*/
+	public function findMadurez()
+	{
+		$query = $this->db->query('select* from GRADO where nombre_grado = "primero" or nombre_grado = "segundo";');
+		return $query->result_array();
+	}
 }
 
 /* End of file Grado_model.php */

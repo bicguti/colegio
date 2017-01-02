@@ -159,8 +159,12 @@ class Estudiante extends CI_Controller {
 		if ($array[1] == 4) {
 			$datos = $this->Estudiante_model->buscar_punt_habitosC($array[0], $ciclo, $fecha);
 		} else {
-			$datos = $this->Estudiante_model->buscar_punt_habitos($array[0], $ciclo, $fecha);
-		}
+			if ($array[1] == 5) {//para el nivel básico por madurez
+					$datos = $this->Estudiante_model->buscar_punt_habitosM($array[0], $ciclo, $fecha);
+			} else {//para el resto de niveles
+					$datos = $this->Estudiante_model->buscar_punt_habitos($array[0], $ciclo, $fecha);
+			}//fin del if else
+		}//fin del if else
 		echo json_encode($datos);
 	}
 
@@ -175,6 +179,20 @@ class Estudiante extends CI_Controller {
 		$data['activo'] = 'estudiante';
 		$this->load->view('plantilla/header', $data);
 		$this->load->view('editar/editarestudiante', $data);
+		$this->load->view('plantilla/footer');
+	}
+
+	/*
+		metodo para mostrar el formulario de edicion de datos de estudiante
+		de nivel diversificado
+	*/
+	public function editar_estudiantec()
+	{
+		$data['carrera'] = $this->Carrera_model->getCarrera();
+		$data['titulo'] = 'Editar Estudiantes';
+		$data['activo'] = 'estudiante';
+		$this->load->view('plantilla/header', $data);
+		$this->load->view('editar/editarestudiantec', $data);
 		$this->load->view('plantilla/footer');
 	}
 
@@ -390,10 +408,55 @@ class Estudiante extends CI_Controller {
 		if ($nivel == 4) {
 			$data = $this->Estudiante_model->getNominaEstudiantesGC($nivel, $carrera, $grado, $ciclo);
 		} else {
-			$data = $this->Estudiante_model->getNominaEstudiantesG($nivel, $grado, $ciclo);
+			if ($nivel == 5) {
+				//estudiantes de básico por madurez
+				$data = $this->Estudiante_model->getNominaEstudiantesGM($nivel, $grado, $ciclo);
+			}else {
+				//estudiantes de nivel pre-primaria, primaria y básico
+				$data = $this->Estudiante_model->getNominaEstudiantesG($nivel, $grado, $ciclo);
+			}
 		}
 		echo json_encode($data);
 	}
+
+	/*
+	nomina para buscar a los estudiantes de un grado de una carrera
+	*/
+	public function nomina_estudiantesc()
+	{
+		$carrera = $this->input->get('carrera');
+		$ciclo = date('Y').'-00-00';
+		$grado = $this->input->get('grado');
+		$nivel = 4;
+		$data = $this->Estudiante_model->getNominaEstudiantesGC($nivel, $carrera, $grado, $ciclo);
+		echo json_encode($data);
+	}
+
+	/*
+	metodo para buscar los datos de un estudiante por su id
+	*/
+	public function buscar_estudianteId()
+	{
+		$id = $this->input->get('id');
+		$datos = $this->Estudiante_model->findEstudianteId($id);
+		echo json_encode($datos);
+	}//fin del metodo
+
+	/*
+			metodo para actulizar los datos de un estudiante por medio de una peticion ajax
+	*/
+	public function actualizar_estudianteId()
+	{
+		$id = $this->input->post('id');
+		$nombre = $this->input->post('nombre');
+		$apellidos = $this->input->post('apellidos');
+		$codigo  = $this->input->post('codigo');
+		$cui = $this->input->post('cui');
+		$nacimiento = $this->input->post('nacimiento');
+		$genero = $this->input->post('genero');
+		$result = $this->Estudiante_model->updateEstudiante($id, $nombre, $apellidos, $nacimiento, $genero, $codigo, $cui);
+		echo $result->msg;
+	}//fin del metodo
 }
 
 /* End of file Estudiante.php */

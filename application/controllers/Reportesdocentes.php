@@ -50,8 +50,14 @@ class Reportesdocentes extends CI_Controller {
 				if ($array[0] == 'diversificado') {
 					$datos = $this->Cuadros_model->datos_cuadrosC($array[1], $fecha, $ciclo);
 				} else {
-					$datos = $this->Cuadros_model->datos_cuadros($array[1], $fecha, $ciclo);
-				}
+					if ($array[0] == 'básico madurez') {//para el nivel básico por madurez
+						$datos = $this->Cuadros_model->datos_cuadrosM($array[1], $fecha, $ciclo);
+					} else {//para los demas niveles
+						$datos = $this->Cuadros_model->datos_cuadros($array[1], $fecha, $ciclo);
+					}
+
+				}//fin del if else
+
 				$this->exportar_pdf($datos, $tipoarch);
 			}
 
@@ -72,7 +78,12 @@ class Reportesdocentes extends CI_Controller {
 				if ($array[0] == 'diversificado') {
 					$datos = $this->Cuadros_model->getExamenPuntosC($array[1], $fecha, $ciclo);
 				} else {
-					$datos = $this->Cuadros_model->getExamenPuntos($array[1], $fecha, $ciclo);
+					if ($array[0] == 'básico madurez') {//para el nivel básico por madurez
+							$datos = $this->Cuadros_model->getExamenPuntosM($array[1], $fecha, $ciclo);
+					} else {//para el resto de nivele
+						$datos = $this->Cuadros_model->getExamenPuntos($array[1], $fecha, $ciclo);
+					}//fin del if else
+
 				}//fin del else
 				$zona = 0;
 				foreach ($datos as $value) {
@@ -87,7 +98,12 @@ class Reportesdocentes extends CI_Controller {
 						if ($array[0] == 'diversificado') {
 							$this->Cuadros_model->total_bloque_c($idCuadro, $total);
 						} else {
-							$this->Cuadros_model->total_bloque($idCuadro, $total);
+							if ($array[0] == 'básico madurez') {//para el nivel básico por madurez
+								$this->Cuadros_model->total_bloqueM($idCuadro, $total);
+							} else {//para el resto de niveles
+									$this->Cuadros_model->total_bloque($idCuadro, $total);
+							}//fin del if else
+
 						}//fin del else
 
 						$cont = 0;
@@ -219,6 +235,9 @@ class Reportesdocentes extends CI_Controller {
 		//$html .= '<h2 style="text-align: center; text-decoration: underline;">CUADRO DE CONTROL EVALUATIVO DE BLOQUE</h2>';
 		$pdf->SetFont('times', '', 11, '', true);
 		foreach ($cabecera as $value) {
+		$miNivel = $value['nivel'];
+		$miCarrera = $value['carrera'];
+		$miGrado = $value['grado'];
 		$pdf->writeHTMLCell(50, 0, '', '', '<b>NIVEL:</b> '.ucwords($value['nivel']), 0, 0, 0, true, 'L', true);
 		$pdf->writeHTMLCell(150, 0, '', '', '<b>CARRERA:</b> '.ucwords($value['carrera']), 0, 1, 0, true, 'L', true);
 		$pdf->writeHTMLCell(50, 0, '', '', '<b>GRADO:</b> '.ucwords($value['grado']), 0, 0, 0, true, 'L', true);
@@ -228,7 +247,7 @@ class Reportesdocentes extends CI_Controller {
 		$pdf->writeHTMLCell(90, 0, '', '', '<b>DOCENTE:</b> '.ucwords($docente), 0, 0, 0, true, 'L', true);
 		$pdf->writeHTMLCell(60, 0, '', '', '<b>CICLO ACADEMICO:</b> '.date('Y'), 0, 1, 0, true, 'L', true);
 
-		}
+	}//fin del forach
 		$txt = "\nLas calificaciones aprobadas se escriben con tinta negra.";
 		$txt .= "\nLas calificaciones reprobadas se escriben con tinta roja.";
 		$txt .= "\nEl trazo de los números debe ser exacto";
@@ -621,17 +640,27 @@ $pdf->setPrintHeader(false);
 			$tipoarch = $this->input->post('tipo');
 				$array = explode(',', $dato);
 				if ($array[0] == 'diversificado') {
-					$datos = $this->Cuadros_model->cuadro_anualC($array[1], $ciclo);
-				 $this->exportar_anual_pdf($datos, $tipoarch);
+					//$datos = $this->Cuadros_model->cuadro_anualC($array[1], $ciclo);
+				 //$this->exportar_anual_pdf($datos, $tipoarch);
+				 $datos = $this->Cuadros_model->getEstudiantesAreaD($ciclo, $array[1]);
+				 $this->exportar_anual_pdf($datos, $tipoarch, $array[0]);
 				} else {
-					$datos = $this->Cuadros_model->cuadro_anual($array[1], $ciclo);
-					$this->exportar_anual_pdf($datos, $tipoarch);
+					if ($array[0] == 'básico madurez') {
+						$datos = $this->Cuadros_model->getEstudiantesAreaM($ciclo, $array[1]);
+	 				 $this->exportar_anual_pdf($datos, $tipoarch, $array[0]);
+					} else {
+						//$datos = $this->Cuadros_model->cuadro_anual($array[1], $ciclo);
+						//$this->exportar_anual_pdf($datos, $tipoarch);
+						$datos = $this->Cuadros_model->getEstudiantesArea($ciclo, $array[1]);
+						$this->exportar_anual_pdf($datos, $tipoarch, $array[0]);
+					}
+
 				}//fin del if else
 
 		}//fin del if else
 	}//fin del metodo
 
-	private function exportar_anual_pdf($datos, $salida)
+	private function exportar_anual_pdf($datos, $salida, $nnivel)
 	{
 		$this->load->library('Pdf');
 
@@ -675,65 +704,64 @@ $pdf->setPrintHeader(false);
 		$cuadro = array();
 		$cabecera = array();
 		$b1 = $b2 = $b3 = $b4 = $b5 = '';
-		foreach ($datos as $value) {
-			if ($value['nombre_bloque'] == 'bloque i') {
-				$b1 = $value['total_bloque'];
-			}//fin del if
-			if ($value['nombre_bloque'] == 'bloque ii') {
-				$b2 = $value['total_bloque'];
-			}//fin del if
-			if ($value['nombre_bloque'] == 'bloque iii') {
-				$b3 = $value['total_bloque'];
-			}//fin del if
-			if ($value['nombre_bloque'] == 'bloque iv') {
-				$b4 = $value['total_bloque'];
-			}//fin del if
-			if ($value['nombre_bloque'] == 'bloque v') {
-				$b5 = $value['total_bloque'];
-			}//fin del if
-			$promedio = round(($b1+$b2+$b3+$b4+$b5)/5);
-			if ($promedio == 0) {
-				$promedio = '';
+		foreach ($datos as $key => $row) {
+			if (isset($row->nombre_carrera)) {
+				$carrera = $row->nombre_carrera;
+			}else {
+				$carrera = '';
 			}
-			$estudiante = $value['apellidos_estudiante'].', '.$value['nombre_estudiante'];
-			$temp = array('b1'=>$b1, 'b2'=>$b2, 'b3'=>$b3, 'b4'=>$b4 , 'b5'=>$b5, 'estudiante'=>$estudiante, 'promedio'=>$promedio);
-			array_push($cuadro, $temp);
-			if ($bandera == false) {
-				if (isset($value['nombre_carrera'])) {
-					$carrera = $value['nombre_carrera'];
-				}else{
-					$carrera = '';
-				}//fin del if else
-				$temp = array('nivel'=>$value['nombre_nivel'], 'area'=>$value['nombre_area'], 'carrera'=>$carrera, 'grado'=>$value['nombre_grado']);
-				array_push($cabecera, $temp);
-				$bandera = true;
-		}
-			if ($cont == 5) {
-				//$promedio = round(($b1+$b2+$b3+$b4+$b5)/5);
-				//$estudiante = $value['apellidos_estudiante'].', '.$value['nombre_estudiante'];
-				//$temp = array('b1'=>$b1, 'b2'=>$b2, 'b3'=>$b3, 'b4'=>$b4 , 'b5'=>$b5, 'estudiante'=>$estudiante, 'promedio'=>$promedio);
-				//array_push($cuadro, $temp);
-				/*if ($bandera == false) {
-					if (isset($value['nombre_carrera'])) {
-						$carrera = $value['nombre_carrera'];
-					}else{
-						$carrera = '';
-					}//fin del if else
-					$temp = array('nivel'=>$value['nombre_nivel'], 'area'=>$value['nombre_area'], 'carrera'=>$carrera, 'grado'=>$value['nombre_grado']);
-					array_push($cabecera, $temp);
-					$bandera = true;
-				}*///fin del if
-				$cont = 0;
-			}//fin del if
-			$temp = '';
-			$cont++;
-		}//fin del foreach
+			$nivel = $row->nombre_nivel;
+			$grado = $row->nombre_grado;
+			$area = $row->nombre_area;
+			//echo $row->apellidos_estudiante.' '.$row->nombre_estudiante.' ';
+			$estudiante = $row->apellidos_estudiante.' '.$row->nombre_estudiante;
+			for ($i=1; $i <= 5; $i++) {
+				if ($nnivel == 'diversificado') {
+					$temp = $this->Cuadros_model->getTotalBloqueD($row->id_asignacion_area, $row->id_estudiante, $i);
+				} else {
+					if ($nnivel == 'básico madurez') {
+						$temp = $this->Cuadros_model->getTotalBloqueM($row->id_asignacion_area, $row->id_estudiante, $i);
+					} else {
+						$temp = $this->Cuadros_model->getTotalBloque($row->id_asignacion_area, $row->id_estudiante, $i);
+					}
 
-		$persona = $_SESSION['nombreautenticado'];
-		$docente = '';
-		foreach ($persona as $value) {
-			$docente = $value['nombre'].' '.$value['apellidos'];
-		}//fin del foreach
+				}
+
+				//echo $temp[0]->total_bloque.' ';
+				switch ($i) {
+					case 1:
+						$b1 = $temp[0]->total_bloque;
+						break;
+					case 2:
+						$b2 = $temp[0]->total_bloque;
+						break;
+					case 3:
+						$b3 = $temp[0]->total_bloque;
+						break;
+					case 4:
+						$b4 = $temp[0]->total_bloque;
+						break;
+					case 5:
+						if (isset($temp[0]->total_bloque)) {
+							$b5 = $temp[0]->total_bloque;
+						} else {
+							$b5 = '';
+						}
+						break;
+				}
+			}
+			//echo '<br />';
+
+			if ($nnivel == 'básico madurez') {
+				$promedio = round(($b1+ $b2 + $b3 + $b4 + $b5)/4, 1);
+			} else {
+				$promedio = round(($b1+ $b2 + $b3 + $b4 + $b5)/5, 2);
+			}
+
+			$temp = array('estudiante'=>$estudiante, 'b1'=>$b1, 'b2'=>$b2, 'b3'=>$b3, 'b4'=>$b4, 'b5'=>$b5, 'promedio'=>$promedio);
+			array_push($cuadro, $temp);
+		}
+
 
 		$persona = $_SESSION['nombreautenticado'];
 		$docente = '';
@@ -748,17 +776,16 @@ $pdf->setPrintHeader(false);
 		//$html .= '<h2 style="text-align: center; text-decoration: underline;">CUADRO DE CONTROL EVALUATIVO DE BLOQUE</h2>';
 		$pdf->SetFont('times', '', 11, '', true);
 
-		foreach ($cabecera as $value) {
-		$pdf->writeHTMLCell(50, 0, '', '', '<b>NIVEL:</b> '.ucwords($value['nivel']), 0, 0, 0, true, 'L', true);
-		$pdf->writeHTMLCell(90, 0, '', '', '<b>CARRERA:</b> '.ucwords($value['carrera']), 0, 1, 0, true, 'L', true);
-		$pdf->writeHTMLCell(50, 0, '', '', '<b>GRADO:</b> '.ucwords($value['grado']), 0, 0, 0, true, 'L', true);
-		$pdf->writeHTMLCell(80, 0, '', '', '<b>ÁREA:</b> '.ucwords($value['area']), 0, 0, 0, true, 'L', true);
-		$pdf->writeHTMLCell(60, 0, '', '', '<b>BLOQUE:</b> I II III IV V', 0, 1, 0, true, 'L', true);
+		$pdf->writeHTMLCell(50, 0, '', '', '<b>NIVEL:</b> '.ucwords($nivel), 0, 0, 0, true, 'L', true);
+		$pdf->writeHTMLCell(140, 0, '', '', '<b>CARRERA:</b> '.ucwords($carrera), 0, 1, 0, true, 'L', true);
+		$pdf->writeHTMLCell(35, 0, '', '', '<b>GRADO:</b> '.ucwords($grado), 0, 0, 0, true, 'L', true);
+		$pdf->writeHTMLCell(110, 0, '', '', '<b>ÁREA:</b> '.ucwords($area), 0, 0, 0, true, 'L', true);
+		$pdf->writeHTMLCell(40, 0, '', '', '<b>BLOQUE:</b> I II III IV V', 0, 1, 0, true, 'L', true);
 		$pdf->writeHTMLCell(50, 0, '', '', '<b>FECHA:</b> '.date('d/m/y'), 0, 0, 0, true, 'L', true);
 		$pdf->writeHTMLCell(80, 0, '', '', '<b>DOCENTE:</b> '.ucwords($docente), 0, 0, 0, true, 'L', true);
 		$pdf->writeHTMLCell(60, 0, '', '', '<b>CICLO ACADEMICO:</b> '.date('Y'), 0, 1, 0, true, 'L', true);
 
-	}
+
 
 		$html = '';
 
@@ -811,11 +838,32 @@ $pdf->setPrintHeader(false);
 		foreach ($cuadro as $value) {
 		$pdf->writeHTMLCell(8, 0, '', '', $cont, 1, 0, 0, true, 'C', true);
 		$pdf->writeHTMLCell(80, 0, '', '', ucwords($value['estudiante']), 1, 0, 0, true, 'L', true);
-		$pdf->writeHTMLCell(15, 0, '', '', $value['b1'], 1, 0, 0, true, 'C', true);
-		$pdf->writeHTMLCell(15, 0, '', '', $value['b2'], 1, 0, 0, true, 'C', true);
-		$pdf->writeHTMLCell(15, 0, '', '', $value['b3'], 1, 0, 0, true, 'C', true);
-		$pdf->writeHTMLCell(15, 0, '', '', $value['b4'], 1, 0, 0, true, 'C', true);
-		$pdf->writeHTMLCell(15, 0, '', '', $value['b5'], 1, 0, 0, true, 'C', true);
+		if ($value['b1'] < 60) {
+			$pdf->writeHTMLCell(15, 0, '', '', '<p style="color:red">'.$value['b1'].'</p>', 1, 0, 0, true, 'C', true);
+		} else {
+			$pdf->writeHTMLCell(15, 0, '', '', $value['b1'], 1, 0, 0, true, 'C', true);
+		}
+		if ($value['b2'] < 60) {
+			$pdf->writeHTMLCell(15, 0, '', '', '<p style="color:red">'.$value['b2'].'</p>', 1, 0, 0, true, 'C', true);
+		} else {
+			$pdf->writeHTMLCell(15, 0, '', '', $value['b2'], 1, 0, 0, true, 'C', true);
+		}
+		if ($value['b3'] < 60) {
+			$pdf->writeHTMLCell(15, 0, '', '', '<p style="color:red">'.$value['b3'].'</p>', 1, 0, 0, true, 'C', true);
+		} else {
+			$pdf->writeHTMLCell(15, 0, '', '', $value['b3'], 1, 0, 0, true, 'C', true);
+		}
+		if ($value['b4'] < 60) {
+			$pdf->writeHTMLCell(15, 0, '', '', '<p style="color:red">'.$value['b4'].'</p>', 1, 0, 0, true, 'C', true);
+		} else {
+			$pdf->writeHTMLCell(15, 0, '', '', $value['b4'], 1, 0, 0, true, 'C', true);
+		}
+		if ($value['b5'] < 60) {
+			$pdf->writeHTMLCell(15, 0, '', '', '<p style="color:red">'.$value['b5'].'</p>', 1, 0, 0, true, 'C', true);
+		} else {
+			$pdf->writeHTMLCell(15, 0, '', '', $value['b5'], 1, 0, 0, true, 'C', true);
+		}
+
 		if ($value['promedio'] < 60) {
 			$pdf->writeHTMLCell(10, 0, '', '', '<p style="color:red">'.$value['promedio'].'</p>', 1, 0, 0, true, 'C', true);
 		} else {
@@ -1032,7 +1080,11 @@ metodo que muestra la opcion de generación de tarjetas para el nivel primario y
 		if (count($datos) == 0) {
 			$data['permiso'] = false;
 		} else {
-			$data['permiso'] = true;
+			if ($datos[0]['id_nivel'] == 1 || $datos[0]['id_nivel'] == 2) {
+				$data['permiso'] = true;
+			} else {
+				$data['permiso'] = false;
+			}
 		}
 		$data['bloque'] = $this->Bloque_model->getBloques();
 		$data['titulo'] = 'Generar Tarjetas de Calificaciones PRE-PRIMARIA - PRIMARIA';
@@ -1124,19 +1176,39 @@ metodo que muestra la opcion de generación de tarjetas para el nivel primario y
 		}
 		$ciclo = date('Y').'-00-00';
 		$fecha = date('Y-m-d');
-		$estudiantes = $this->Estudiante_model->getNominaEstudiantes($nivel, $grado, $ciclo, $fecha);
+		$estudiantes = $this->Estudiante_model->getNominaEstudiantes($nivel, $grado, $ciclo, $fecha);//obtener la nomina de los estudiantes del nivel, grado y ciclo academico
 		$nestudiante = '';
+		$puntosBloque = array();
+		$cantidadAreas = 0;
+		$clave = 1;
+		$numEstudiantes =	count($estudiantes);
 		foreach ($estudiantes as $key => $value) {
 			$nestudiante = $value['apellidos_estudiante'].', '.$value['nombre_estudiante'];
 			$idest = $value['id_estudiante'];
-			$puntos = $this->Estudiante_model->buscar_puntuacion($idest, $bloque, $ciclo);
+
+							$temp = $this->Estudiante_model->buscar_puntuacion($idest, $bloque, $ciclo); // buscamos el total de bloque de todaslas áreas para el estudiante
+						//$cantidadAreas = count($temp);//obtenemops el la cantidad de áreas
+						foreach ($temp as $key => $value) {//recorremos los datos obtenido de la consulta
+							$aux = array('nombre_area' => $value['nombre_area'], 'total_bloque' => $value['total_bloque'], 'habitos_orden' => $value['habitos_orden'], 'punt_asist' => $value['punt_asist']);//obtenmos el nombre del área y el total de bloque de esa área
+							array_push($puntosBloque, $aux);//lo agregamos a un array
+						}//fin del foreach
+
+			$puntos = $this->crearTabla_datos($puntosBloque);//enviamos los datos este metodo para que crea una tabla de valores
+			/*foreach ($puntos as $key => $value) {//recorremos los datos obtenidos del metodo
+				echo $value['nombre_area'].' '.$value['b1'].' '.$value['b2'].' '.$value['b3'].' '.$value['b4'].' '.$value['b5'].'<br />	';
+			}*/
+			$puntosBloque = array(); //limpiamos el array para obtener nuevos datos de otro estudiante
+			//$puntos = $this->Estudiante_model->buscar_puntuacion($idest, $bloque, $ciclo);
+
 			$habitos = $this->Estudiante_model->buscar_punt_habitos($idest, $ciclo, $fecha);
 			$this->agregar_cuerpo_tarjeta($pdf, $nnivel, $ngrado, $nivel, $persona, $nestudiante, $puntos, $bloque, $habitos);
-				if ($key < count($estudiantes)-1) {
+				//agregando nueva hoja
+				if ($clave < $numEstudiantes) {
 					$pdf->AddPage();
 				}
+				$clave++;
 			$pdf->SetFont('times', '', 12, '', true);
-		}
+		}//fin del foreach para recorrera la nomina de los estudiantes
 
 		$nArchivo = '';
 		if ($nnivel == 'pre-primaria') {
@@ -1156,6 +1228,42 @@ metodo que muestra la opcion de generación de tarjetas para el nivel primario y
 		}
 
 
+	}
+
+	private function crearTabla_datos($puntosBloque)//metodo que se encarga de crear una tabla para las puntuaciones del estudiante de los cinco bloques
+	{
+		$contador = 1;
+		$tablaDatos =		array();
+		$aux = '';
+		$bloque = 0;
+		$hab = array();
+		$punt =		array();
+		foreach ($puntosBloque as $key => $value) {
+			if ($bloque < 5) {
+				$hab[$bloque] = $value['habitos_orden'];
+				$punt[$bloque] = $value['punt_asist'];
+			}
+			if ($contador == 5) {
+				//echo ' Bloque: '.$contador.' '.$value['total_bloque'].'<br />	';
+				$aux .= $value['total_bloque'];//string concatenado separado poc comas
+				$array = explode(',', $aux);//convertimos en array el estring indecandole al metodp que veifique las comas
+				$temp = array('nombre_area' => $array[0], 'b1' => $array[1], 'b2' => $array[2], 'b3' => $array[3], 'b4' => $array[4], 'b5' => $array[5], 'hab1' => $hab[0], 'hab2' => $hab[1], 'hab3' => $hab[2], 'hab4' => $hab[3], 'hab5' => $hab[4], 'punt1' => $punt[0], 'punt2' => $punt[1], 'punt3' => $punt[2], 'punt4' => $punt[3], 'punt5' => $punt[4] );//creamos un array
+				array_push($tablaDatos, $temp);//lo agregamos al attay de tabla datos
+				$contador = 0;//reiniciamos el contador a  0
+			} else {
+				if ($contador ==	1) {
+					//echo $value['nombre_area'].' Bloque: '.$contador.' '.$value['total_bloque'];
+					$aux = $value['nombre_area'].','.$value['total_bloque'].',';//creamos un string y cada dato los separamos por comas
+				}else {
+					//echo ' Bloque: '.$contador.' '.$value['total_bloque'];
+					$aux .= $value['total_bloque'].',';//concatenamos los demas datos para que se cree un string separado por comas
+
+				}//fin del if else
+			}//fin del if else
+			$contador++;
+			$bloque++;
+		}//fin del foreach
+		return $tablaDatos;//retornamos los datos ya convertidos en tabla
 	}
 
 	private function agregar_cuerpo_tarjeta($pdf, $nnivel, $ngrado, $nivel, $persona, $estudiante, $puntos, $bloque, $mhabitos)
@@ -1194,118 +1302,112 @@ metodo que muestra la opcion de generación de tarjetas para el nivel primario y
 		$pdf->SetXY(10.5, 86.5);
 		//$pdf->writeHTMLCell(31.5, 106, '', '', '<b>'.count($puntos).'</b>', 0, 1, 0, true, 'L', true);
 		$perdidos = false;
+		$promedioPerdido = false;
 		foreach ($puntos as  $value) {
 			$pdf->SetX(10.5);
 			$pdf->writeHTMLCell(84.1, 5, '', '', ucwords($value['nombre_area']), 1, 0, 1, true, 'L', true);
-
-			switch ($bloque) {
-				case 1:
-					$b1 = $value['total_bloque'];
-					if ($b1 <60 ) {
-
-						$perdidos = true;
-					}
-					if ($ngrado == 'párvulos') {
-						if ($b1 >=90 && $b1<=100) {
-								$b1 = '<span color="blue">XXX</span>';
-						}elseif ($b1 >= 70 && $b1 <= 89) {
-							$b1 = '<span color="yellow">XXX</span>';
-							}else{
-							$b1 = '<span color="green">XXX</span>';
-						}
+			//bloque numero uno
+			$b1 = $value['b1'];
+			if ($ngrado == 'párvulos') {
+							if (1 <= $bloque) {
+				if ($b1 >=90 && $b1<=100) {
+						$b1 = '<span color="blue">XXX</span>';
+				}elseif ($b1 >= 70 && $b1 <= 89) {
+					$b1 = '<span color="yellow">XXX</span>';
 					}else{
-						if ($b1 < 60) {
-							$b1 = '<span color="red">'.$b1.'</span>';
-						}
-					}
-					break;
-				case 2:
-					$b2 = $value['total_bloque'];
-					if ($b2 < 60) {
-						$perdidos = true;
-					}
-					if ($ngrado == 'párvulos') {
-						if ($b2 >=90 && $b2<=100) {
-								$b2 = '<span color="blue">XXX</span>';
-						}elseif ($b2 >= 70 && $b2 <= 89) {
-							$b2 = '<span color="yellow">XXX</span>';
-							}else{
-							$b2 = '<span color="green">XXX</span>';
-						}
-					}else {
-						if ($b2 < 60) {
-							$b2 = '<span color="red">'.$b2.'</span>';
-						}
-					}
-					break;
-				case 3:
-					$b3 = $value['total_bloque'];
-					if ($b3 < 60) {
-
-						$perdidos = true;
-					}
-					if ($ngrado == 'párvulos') {
-						if ($b3 >=90 && $b3<=100) {
-								$b3 = '<span color="blue">XXX</span>';
-						}elseif ($b3 >= 70 && $b3 <= 89) {
-							$b3 = '<span color="yellow">XXX</span>';
-							}else{
-							$b3 = '<span color="green">XXX</span>';
-						}
-					}else {
-						if ($b3 < 60) {
-							$b3 = '<span color="red">'.$b3.'</span>';
-						}
-					}
-					break;
-				case 4:
-					$b4 = $value['total_bloque'];
-					if ($b4 < 60) {
-
-						$perdidos = true;
-					}
-					if ($ngrado == 'párvulos') {
-						if ($b4 >=90 && $b4<=100) {
-								$b4 = '<span color="blue">XXX</span>';
-						}elseif ($b4 >= 70 && $b4 <= 89) {
-							$b4 = '<span color="yellow">XXX</span>';
-							}else{
-							$b4 = '<span color="blue">XXX</span>';
-						}
+					$b1 = '<span color="green">XXX</span>';
+				}
+			}//fin del if
+			}else{
+				if ($b1 < 60) {
+					$b1 = '<span color="red">'.$b1.'</span>';
+				}
+			}
+			//fin del bloque numero uno
+		//bloque numero dos
+			$b2 = $value['b2'];
+			if ($ngrado == 'párvulos') {
+				if (2 <= $bloque) {
+				if ($b2 >=90 && $b2<=100) {
+						$b2 = '<span color="blue">XXX</span>';
+				}elseif ($b2 >= 70 && $b2 <= 89) {
+					$b2 = '<span color="yellow">XXX</span>';
 					}else{
-						if ($b4 < 60) {
-							$b4 = '<span color="red">'.$b4.'</span>';
-						}
-					}
-					break;
-				case 5:
-					$b5 = $value['total_bloque'];
-					if ($b5 < 60) {
+					$b2 = '<span color="green">XXX</span>';
+				}
+			}//fin del if
+			}else {
+				if ($b2 < 60) {
+					$b2 = '<span color="red">'.$b2.'</span>';
+				}
+			}
+			//fin del bloque numero dos
+			//bloque numero tres
+			$b3 = $value['b3'];
 
-						$perdidos = true;
-					}
-					if ($ngrado == 'párvulos') {
-						if ($b5 >=90 && $b5<=100) {
-								$b5 = '<span color="blue">XXX</span>';
-						}elseif ($b5 >= 70 && $b5 <= 89) {
-							$b5 = '<span color="yellow">XXX</span>';
-							}else{
-							$b5 = '<span color="green">XXX</span>';
-						}
+			if ($ngrado == 'párvulos') {
+						if (3 <= $bloque) {
+				if ($b3 >=90 && $b3<=100) {
+						$b3 = '<span color="blue">XXX</span>';
+				}elseif ($b3 >= 70 && $b3 <= 89) {
+					$b3 = '<span color="yellow">XXX</span>';
 					}else{
-						if ($b5 < 60) {
-							$b5 = '<span color="red">'.$b5.'</span>';
-						}
-					}
-					break;
-			}//fin del switch
+					$b3 = '<span color="green">XXX</span>';
+				}
+			}//fin del if
+			}else {
+				if ($b3 < 60) {
+					$b3 = '<span color="red">'.$b3.'</span>';
+				}
+			}
+			//fin del bloque numero tres
+			//bloque numero cuatro
+			$b4 = $value['b4'];
+
+			if ($ngrado == 'párvulos') {
+				if (4 <= $bloque) {
+				if ($b4 >=90 && $b4<=100) {
+						$b4 = '<span color="blue">XXX</span>';
+				}elseif ($b4 >= 70 && $b4 <= 89) {
+					$b4 = '<span color="yellow">XXX</span>';
+					}else{
+					$b4 = '<span color="green">XXX</span>';
+				}
+			}//fin del if
+			}else {
+				if ($b4 < 60) {
+					$b4 = '<span color="red">'.$b4.'</span>';
+				}
+			}
+			//fin del bloque numero cuatro
+			//blolque numero cinco
+			$b5 = $value['b5'];
+
+			if ($ngrado == 'párvulos') {
+				if (5 <= $bloque) {
+				if ($b5 >=90 && $b5<=100) {
+						$b5 = '<span color="blue">XXX</span>';
+				}elseif ($b5 >= 70 && $b5 <= 89) {
+					$b5 = '<span color="yellow">XXX</span>';
+					}else{
+					$b5 = '<span color="green">XXX</span>';
+				}
+			}//fin del if
+			}else{
+				if ($b5 < 60) {
+					$b5 = '<span color="red">'.$b5.'</span>';
+				}
+			}
+		//fin del bloque numero cinco
 
 			$pdf->writeHTMLCell(13.8, 5, '', '', $b1, 1, 0, 1, true, 'C', true);
 			$pdf->writeHTMLCell(13.8, 5, '', '', $b2, 1, 0, 1, true, 'C', true);
 			$pdf->writeHTMLCell(13.8, 5, '', '', $b3, 1, 0, 1, true, 'C', true);
 			$pdf->writeHTMLCell(13.8, 5, '', '', $b4, 1, 0, 1, true, 'C', true);
 			$pdf->writeHTMLCell(13.8, 5, '', '', $b5, 1, 0, 1, true, 'C', true);
+
 			if ($bloque == 5) {
+				$promedio = round(($b1+$b2+$b3+$b4+$b5)/5, 2);
 				if ($ngrado == 'párvulos') {
 						if ($promedio >= 90 && $promedio <= 100) {
 							$pdf->writeHTMLCell(13.8, 5, '', '', '<span color="blue">XXX</span>', 1, 0, 1, true, 'L', true);
@@ -1316,7 +1418,13 @@ metodo que muestra la opcion de generación de tarjetas para el nivel primario y
 						}
 
 				} else {
-					$pdf->writeHTMLCell(13.8, 5, '', '', $promedio, 1, 0, 1, true, 'L', true);
+					if ($promedio < 60) {
+						$pdf->writeHTMLCell(13.8, 5, '', '', '<span color="red">'.$promedio.'</span>', 1, 0, 1, true, 'L', true);
+						$promedioPerdido = true;
+					} else {
+						$pdf->writeHTMLCell(13.8, 5, '', '', $promedio, 1, 0, 1, true, 'L', true);
+					}
+
 				}
 				if ($promedio >=60) {
 					$pdf->writeHTMLCell(13.8, 5, '', '', '<span>X</span>', 1, 0, 1, true, 'L', true);
@@ -1331,63 +1439,40 @@ metodo que muestra la opcion de generación de tarjetas para el nivel primario y
 				$pdf->writeHTMLCell(13.8, 5, '', '', '', 1, 0, 1, true, 'L', true);
 				$pdf->writeHTMLCell(13.8, 5, '', '', '', 1, 1, 1, true, 'L', true);
 			}
-
-
+			$hab1 =	$value['hab1'];
+			$hab2 =	$value['hab2'];
+			$hab3 =	$value['hab3'];
+			$hab4 =	$value['hab4'];
+			$hab5 =	$value['hab5'];
+			$punt1 = $value['punt1'];
+			$punt2 = $value['punt2'];
+			$punt3 = $value['punt3'];
+			$punt4 = $value['punt4'];
+			$punt5 = $value['punt5'];
 		}//fin del foreach
-		$puntualidad = strtoupper($mhabitos[0]['punt_asist']);
+
+		//extraemos la puntualidad y asistencia
+		//$puntualidad = strtoupper($mhabitos[0]['punt_asist']);
 			$pdf->SetX(10.5);
-			switch ($bloque) {
-				case 1:
-					$b1 = $puntualidad;
-					break;
-				case 2:
-					$b2 = $puntualidad;
-					break;
-				case 3:
-					$b3 = $puntualidad;
-					break;
-				case 4:
-					$b4 = $puntualidad;
-					break;
-				case 5:
-					$b5 = $puntualidad;
-					break;
-			}
+
 			$pdf->writeHTMLCell(84.1, 5, '', '', 'Puntualidad y Asistencia a Clases', 1, 0, 1, true, 'L', true);
-			$pdf->writeHTMLCell(13.8, 5, '', '', $b1, 1, 0, 1, true, 'C', true);
-			$pdf->writeHTMLCell(13.8, 5, '', '', $b2, 1, 0, 1, true, 'C', true);
-			$pdf->writeHTMLCell(13.8, 5, '', '', $b3, 1, 0, 1, true, 'C', true);
-			$pdf->writeHTMLCell(13.8, 5, '', '', $b4, 1, 0, 1, true, 'C', true);
-			$pdf->writeHTMLCell(13.8, 5, '', '', $b5, 1, 0, 1, true, 'C', true);
+			$pdf->writeHTMLCell(13.8, 5, '', '', $punt1, 1, 0, 1, true, 'C', true);
+			$pdf->writeHTMLCell(13.8, 5, '', '', $punt2, 1, 0, 1, true, 'C', true);
+			$pdf->writeHTMLCell(13.8, 5, '', '', $punt3, 1, 0, 1, true, 'C', true);
+			$pdf->writeHTMLCell(13.8, 5, '', '', $punt4, 1, 0, 1, true, 'C', true);
+			$pdf->writeHTMLCell(13.8, 5, '', '', $punt5, 1, 0, 1, true, 'C', true);
 			$pdf->writeHTMLCell(13.8, 5, '', '', '', 1, 0, 1, true, 'C', true);
 			$pdf->writeHTMLCell(13.8, 5, '', '', '', 1, 0, 1, true, 'C', true);
 			$pdf->writeHTMLCell(13.8, 5, '', '', '', 1, 1, 1, true, 'C', true);
 
 			$pdf->SetX(10.5);
-			$habitos = strtoupper($mhabitos[0]['habitos_orden']);
-			switch ($bloque) {
-				case 1:
-					$b1 = $habitos;
-					break;
-				case 2:
-					$b2 = $habitos;
-					break;
-				case 3:
-					$b3 = $habitos;
-					break;
-				case 4:
-					$b4 = $habitos;
-					break;
-				case 5:
-					$b5 = $habitos;
-					break;
-			}
+
 			$pdf->writeHTMLCell(84.1, 5, '', '', 'Hábitos de Orden y Limpieza', 1, 0, 1, true, 'L', true);
-			$pdf->writeHTMLCell(13.8, 5, '', '', $b1, 1, 0, 1, true, 'C', true);
-			$pdf->writeHTMLCell(13.8, 5, '', '', $b2, 1, 0, 1, true, 'C', true);
-			$pdf->writeHTMLCell(13.8, 5, '', '', $b3, 1, 0, 1, true, 'C', true);
-			$pdf->writeHTMLCell(13.8, 5, '', '', $b4, 1, 0, 1, true, 'C', true);
-			$pdf->writeHTMLCell(13.8, 5, '', '', $b5, 1, 0, 1, true, 'C', true);
+			$pdf->writeHTMLCell(13.8, 5, '', '', $hab1, 1, 0, 1, true, 'C', true);
+			$pdf->writeHTMLCell(13.8, 5, '', '', $hab2, 1, 0, 1, true, 'C', true);
+			$pdf->writeHTMLCell(13.8, 5, '', '', $hab3, 1, 0, 1, true, 'C', true);
+			$pdf->writeHTMLCell(13.8, 5, '', '', $hab4, 1, 0, 1, true, 'C', true);
+			$pdf->writeHTMLCell(13.8, 5, '', '', $hab5, 1, 0, 1, true, 'C', true);
 			$pdf->writeHTMLCell(13.8, 5, '', '', '', 1, 0, 1, true, 'C', true);
 			$pdf->writeHTMLCell(13.8, 5, '', '', '', 1, 0, 1, true, 'C', true);
 			$pdf->writeHTMLCell(13.8, 5, '', '', '', 1, 1, 1, true, 'C', true);
@@ -1416,53 +1501,222 @@ metodo que muestra la opcion de generación de tarjetas para el nivel primario y
 
 		$pdf->SetFont('times', '', 12, '', true);
 
-		$observacion = '';
-		if ($perdidos == true) {
-				$observacion = 'Necesitas empeño y dedicación en la(s) área(s) perdida(s), Dios te Bendiga.';
-		} else {
-			$observacion = 'Felicidades por tu excelente rendimiento academico, Dios te Bendiga.';
-		}
+		$observacion1 = $observacion2 = $observacion3 = $observacion4 = $observacion5 = '';
 
+$perdidos =	false;
 		switch ($bloque) {
-			case 1:
-			$pdf->writeHTMLCell(190, 5, '', '', 'I BLOQUE: '.$observacion, 0, 1, 1, true, 'L', true);
-			$pdf->writeHTMLCell(190, 5, '', '', 'II BLOQUE:', 0, 1, 1, true, 'L', true);
-			$pdf->writeHTMLCell(190, 5, '', '', 'III BLOQUE:', 0, 1, 1, true, 'L', true);
-			$pdf->writeHTMLCell(190, 5, '', '', 'IV BLOQUE:', 0, 1, 1, true, 'L', true);
-			$pdf->writeHTMLCell(190, 5, '', '', 'V BLOQUE:', 0, 1, 1, true, 'L', true);
-			$pdf->writeHTMLCell(190, 5, '', '', 'RESULTADO FINAL:', 0, 1, 1, true, 'L', true);
+			case '1':
+						for ($i=0; $i < count($puntos) ; $i++) {
+								if ($puntos[$i]['b1'] < 60) {
+									$perdidos = true;
+								}
+						}
+						if ($perdidos == true) {
+							$observacion1 = 'Necesitas empeño y dedicación en la(s) área(s) perdida(s), Dios te Bendiga.';
+						} else {
+							$observacion1 = 'Felicidades por tu excelente rendimiento academico, Dios te Bendiga.';
+						}
 				break;
 
-			case 2:
-			$pdf->writeHTMLCell(190, 5, '', '', 'I BLOQUE: ', 0, 1, 1, true, 'L', true);
-			$pdf->writeHTMLCell(190, 5, '', '', 'II BLOQUE: '.$observacion, 0, 1, 1, true, 'L', true);
-			$pdf->writeHTMLCell(190, 5, '', '', 'III BLOQUE:', 0, 1, 1, true, 'L', true);
-			$pdf->writeHTMLCell(190, 5, '', '', 'IV BLOQUE:', 0, 1, 1, true, 'L', true);
-			$pdf->writeHTMLCell(190, 5, '', '', 'V BLOQUE:', 0, 1, 1, true, 'L', true);
-			$pdf->writeHTMLCell(190, 5, '', '', 'RESULTADO FINAL:', 0, 1, 1, true, 'L', true);
+			case '2':
+							for ($i=0; $i < count($puntos) ; $i++) {
+									if ($puntos[$i]['b1'] < 60) {
+										$perdidos = true;
+									}
+							}
+							if ($perdidos == true) {
+								$observacion1 = 'Necesitas empeño y dedicación en la(s) área(s) perdida(s), Dios te Bendiga.';
+							} else {
+								$observacion1 = 'Felicidades por tu excelente rendimiento academico, Dios te Bendiga.';
+							}
+
+							//verificando si perdio un área del bloque para establecer el mensaje del bloque dos
+							$perdidos =	false;
+							for ($i=0; $i < count($puntos) ; $i++) {
+									if ($puntos[$i]['b2'] < 60) {
+										$perdidos = true;
+									}
+							}
+							if ($perdidos == true) {
+								$observacion2 = 'Necesitas empeño y dedicación en la(s) área(s) perdida(s), Dios te Bendiga.';
+							} else {
+								$observacion2 = 'Felicidades por tu excelente rendimiento academico, Dios te Bendiga.';
+							}
 				break;
 
-			case 3:
-			$pdf->writeHTMLCell(190, 5, '', '', 'I BLOQUE: ', 0, 1, 1, true, 'L', true);
-			$pdf->writeHTMLCell(190, 5, '', '', 'II BLOQUE: ', 0, 1, 1, true, 'L', true);
-			$pdf->writeHTMLCell(100, 5, '', '', 'III BLOQUE: '.$observacion, 0, 1, 1, true, 'L', true);
-			$pdf->writeHTMLCell(190, 5, '', '', 'IV BLOQUE:', 0, 1, 1, true, 'L', true);
-			$pdf->writeHTMLCell(190, 5, '', '', 'V BLOQUE:', 0, 1, 1, true, 'L', true);
-			$pdf->writeHTMLCell(190, 5, '', '', 'RESULTADO FINAL:', 0, 1, 1, true, 'L', true);
-			break;
+			case '3':
+							//verificando si perdio un área del bloque para establecer el mensaje del bloque uno
 
-			case 4:
-					# code...
-			break;
+							for ($i=0; $i < count($puntos) ; $i++) {
+									if ($puntos[$i]['b1'] < 60) {
+										$perdidos = true;
+									}
+							}
+							if ($perdidos == true) {
+								$observacion1 = 'Necesitas empeño y dedicación en la(s) área(s) perdida(s), Dios te Bendiga.';
+							} else {
+								$observacion1 = 'Felicidades por tu excelente rendimiento academico, Dios te Bendiga.';
+							}
 
-			case 5:
-						# code...
-			break;
-			default:
-				# code...
+							//verificando si perdio un área del bloque para establecer el mensaje del bloque dos
+							$perdidos =	false;
+							for ($i=0; $i < count($puntos) ; $i++) {
+									if ($puntos[$i]['b2'] < 60) {
+										$perdidos = true;
+									}
+							}
+							if ($perdidos == true) {
+								$observacion2 = 'Necesitas empeño y dedicación en la(s) área(s) perdida(s), Dios te Bendiga.';
+							} else {
+								$observacion2 = 'Felicidades por tu excelente rendimiento academico, Dios te Bendiga.';
+							}
+
+							//verificando si perdio un área del bloque para establecer el mensaje del bloque tres
+							$perdidos =	false;
+							for ($i=0; $i < count($puntos) ; $i++) {
+									if ($puntos[$i]['b3'] < 60) {
+										$perdidos = true;
+									}
+							}
+							if ($perdidos == true) {
+								$observacion3 = 'Necesitas empeño y dedicación en la(s) área(s) perdida(s), Dios te Bendiga.';
+							} else {
+								$observacion3 = 'Felicidades por tu excelente rendimiento academico, Dios te Bendiga.';
+							}
 				break;
+
+			case '4':
+							for ($i=0; $i < count($puntos) ; $i++) {
+									if ($puntos[$i]['b1'] < 60) {
+										$perdidos = true;
+									}
+							}
+							if ($perdidos == true) {
+								$observacion1 = 'Necesitas empeño y dedicación en la(s) área(s) perdida(s), Dios te Bendiga.';
+							} else {
+								$observacion1 = 'Felicidades por tu excelente rendimiento academico, Dios te Bendiga.';
+							}
+
+							//verificando si perdio un área del bloque para establecer el mensaje del bloque dos
+							$perdidos =	false;
+							for ($i=0; $i < count($puntos) ; $i++) {
+									if ($puntos[$i]['b2'] < 60) {
+										$perdidos = true;
+									}
+							}
+							if ($perdidos == true) {
+								$observacion2 = 'Necesitas empeño y dedicación en la(s) área(s) perdida(s), Dios te Bendiga.';
+							} else {
+								$observacion2 = 'Felicidades por tu excelente rendimiento academico, Dios te Bendiga.';
+							}
+
+							//verificando si perdio un área del bloque para establecer el mensaje del bloque tres
+							$perdidos =	false;
+							for ($i=0; $i < count($puntos) ; $i++) {
+									if ($puntos[$i]['b3'] < 60) {
+										$perdidos = true;
+									}
+							}
+							if ($perdidos == true) {
+								$observacion3 = 'Necesitas empeño y dedicación en la(s) área(s) perdida(s), Dios te Bendiga.';
+							} else {
+								$observacion3 = 'Felicidades por tu excelente rendimiento academico, Dios te Bendiga.';
+							}
+
+							//verificando si perdio un área del bloque para establecer el mensaje del bloque cuatro
+							$perdidos =	false;
+							for ($i=0; $i < count($puntos) ; $i++) {
+									if ($puntos[$i]['b4'] < 60) {
+										$perdidos = true;
+									}
+							}
+							if ($perdidos == true) {
+								$observacion4 = 'Necesitas empeño y dedicación en la(s) área(s) perdida(s), Dios te Bendiga.';
+							} else {
+								$observacion4 = 'Felicidades por tu excelente rendimiento academico, Dios te Bendiga.';
+							}
+				break;
+
+			case '5':
+							//verificando si perdio un área del bloque para establecer el mensaje del bloque uno
+
+							for ($i=0; $i < count($puntos) ; $i++) {
+									if ($puntos[$i]['b1'] < 60) {
+										$perdidos = true;
+									}
+							}
+							if ($perdidos == true) {
+								$observacion1 = 'Necesitas empeño y dedicación en la(s) área(s) perdida(s), Dios te Bendiga.';
+							} else {
+								$observacion1 = 'Felicidades por tu excelente rendimiento academico, Dios te Bendiga.';
+							}
+
+							//verificando si perdio un área del bloque para establecer el mensaje del bloque dos
+							$perdidos =	false;
+							for ($i=0; $i < count($puntos) ; $i++) {
+									if ($puntos[$i]['b2'] < 60) {
+										$perdidos = true;
+									}
+							}
+							if ($perdidos == true) {
+								$observacion2 = 'Necesitas empeño y dedicación en la(s) área(s) perdida(s), Dios te Bendiga.';
+							} else {
+								$observacion2 = 'Felicidades por tu excelente rendimiento academico, Dios te Bendiga.';
+							}
+
+							//verificando si perdio un área del bloque para establecer el mensaje del bloque tres
+							$perdidos =	false;
+							for ($i=0; $i < count($puntos) ; $i++) {
+									if ($puntos[$i]['b3'] < 60) {
+										$perdidos = true;
+									}
+							}
+							if ($perdidos == true) {
+								$observacion3 = 'Necesitas empeño y dedicación en la(s) área(s) perdida(s), Dios te Bendiga.';
+							} else {
+								$observacion3 = 'Felicidades por tu excelente rendimiento academico, Dios te Bendiga.';
+							}
+
+							//verificando si perdio un área del bloque para establecer el mensaje del bloque cuatro
+							$perdidos =	false;
+							for ($i=0; $i < count($puntos) ; $i++) {
+									if ($puntos[$i]['b4'] < 60) {
+										$perdidos = true;
+									}
+							}
+							if ($perdidos == true) {
+								$observacion4 = 'Necesitas empeño y dedicación en la(s) área(s) perdida(s), Dios te Bendiga.';
+							} else {
+								$observacion4 = 'Felicidades por tu excelente rendimiento academico, Dios te Bendiga.';
+							}
+
+							//verificando si perdio un área del bloque para establecer el mensaje del bloque cinco
+							$perdidos =	false;
+							for ($i=0; $i < count($puntos) ; $i++) {
+									if ($puntos[$i]['b5'] < 60) {
+										$perdidos = true;
+									}
+							}
+							if ($perdidos == true) {
+								$observacion5 = 'Necesitas empeño y dedicación en la(s) área(s) perdida(s), Dios te Bendiga.';
+							} else {
+								$observacion5 = 'Felicidades por tu excelente rendimiento academico, Dios te Bendiga.';
+							}
+				break;
+		}//fin del switch
+
+		//escribimos los mensajes de observaciones de bloque
+		$pdf->writeHTMLCell(190, 5, '', '', 'I BLOQUE: '.$observacion1, 0, 1, 1, true, 'L', true);
+		$pdf->writeHTMLCell(190, 5, '', '', 'II BLOQUE:'.$observacion2, 0, 1, 1, true, 'L', true);
+		$pdf->writeHTMLCell(190, 5, '', '', 'III BLOQUE:'.$observacion3, 0, 1, 1, true, 'L', true);
+		$pdf->writeHTMLCell(190, 5, '', '', 'IV BLOQUE:'.$observacion4, 0, 1, 1, true, 'L', true);
+		$pdf->writeHTMLCell(190, 5, '', '', 'V BLOQUE:'.$observacion5, 0, 1, 1, true, 'L', true);
+
+		if ($promedioPerdido == true) {
+			$pdf->writeHTMLCell(190, 5, '', '', 'RESULTADO FINAL: <i>*Pendiente</i>', 0, 1, 1, true, 'L', true);
+		} else {
+			$pdf->writeHTMLCell(190, 5, '', '', 'RESULTADO FINAL: <i>Aprobado</i>', 0, 1, 1, true, 'L', true);
 		}
-
 
 
 

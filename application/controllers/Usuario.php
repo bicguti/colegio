@@ -57,7 +57,22 @@ class Usuario extends CI_Controller {
 			}
 			$this->session->set_userdata('dPersona', $datos);
 			$this->index();
+		}//fin del if else
+	}
+
+	/*
+			Metodo para buscar a una persona por medio de una peticion ajax que contenga las iniciales de us apellido que se solicita
+	*/
+	public function buscar_persona_ajax()
+	{
+		$datos = array();
+		$apellido = $this->input->get('apellido');
+		$persona = $this->Persona_model->findPersona($apellido);
+		foreach ($persona as $value) {
+			$temp = array('id'=>$value['id_persona'], 'nombres'=>$value['nombre_persona'], 'apellidos'=>$value['apellidos_persona'], 'puesto'=>$value['nombre_puesto']);
+			array_push($datos, $temp);
 		}
+		echo json_encode($datos);
 	}
 
 	public function seleccionar_docente()

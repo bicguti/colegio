@@ -1,6 +1,9 @@
 body{
 	padding-top: 60px;
 	background-color: #EEEEEE;
+	background: url('../img/educacion.jpg') no-repeat fixed 0 0;
+	background-size: cover;
+    position: relative;
 	/*background-color: #FAF9F9;*/
 	/*background-color: #18bc9c;*/
 	/*background-color: rgba(24, 188, 156, 0.64);*/
@@ -8,6 +11,9 @@ body{
 	background-repeat: no-repeat;
 	background-attachment: fixed;*/
 
+}
+input[type="text"]{
+	text-transform: uppercase;
 }
 /*.panel-primary>.panel-heading{
 			background-color: #009688;
@@ -154,8 +160,6 @@ li a span{
 	position: relative;
 	padding: 1em;
 	margin-top: 5%;
-	border: 3px solid #009688;
-	border-radius: 10px;
 }
 .cssload-fond{
 	position:relative;

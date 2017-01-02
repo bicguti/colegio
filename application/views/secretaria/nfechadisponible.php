@@ -14,30 +14,65 @@
 			<tr>
 				<th>Bloque*</th>
 				<th>Fecha Inicio*</th>
-				<th>Fecha Fin*</th>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+				<th>Fecha Fin*</th>
 			</tr>
 		</thead>
 			<tbody>
-
+        <tr>
+          <td>
+            <fieldset>
+                <legend>Fechas Plan Diario Y Fin de Semana</legend>
+            </fieldset>
+          </td>
+        </tr>
 				<?php $cont=1; foreach ($fechaDisponible as $value): ?>
 					<tr>
 						<?php if ($cont == 1): ?>
-							<td class="text-info">BLOQUE I</td>	
+							<td class="text-info">BLOQUE I</td>
 						<?php endif; ?>
 						<?php if ($cont == 2): ?>
-							<td class="text-info">BLOQUE II</td>	
+							<td class="text-info">BLOQUE II</td>
 						<?php endif ?>
 						<?php if ($cont == 3): ?>
-							<td class="text-info">BLOQUE III</td>	
+							<td class="text-info">BLOQUE III</td>
 						<?php endif ?>
 						<?php if ($cont == 4): ?>
-							<td class="text-info">BLOQUE IV</td>	
+							<td class="text-info">BLOQUE IV</td>
 						<?php endif ?>
 						<?php if ($cont == 5): ?>
-							<td class="text-info">BLOQUE V</td>	
+							<td class="text-info">BLOQUE V</td>
 						<?php endif ?>
 						<td> <input type="text" class="form-control datepicker" name="fechainicio[]" required="required" placeholder="Fecha de Inicio" value="<?php echo $value['fecha_inicio'] ?>"> </td>
 						<td> <input type="text" class="form-control datepicker" name="fechafin[]" required="required" placeholder="Fecha de Inicio" value="<?php echo $value['fecha_final'] ?>"> </td>
+					</tr>
+					<?php $cont++; ?>
+				<?php endforeach ?>
+        <tr>
+          <td>
+            <fieldset>
+                <legend>Fechas Plan Básico por Madurez</legend>
+            </fieldset>
+          </td>
+        </tr>
+        <?php $cont=1; foreach ($fechaDisponibleM as $value): ?>
+					<tr>
+						<?php if ($cont == 1): ?>
+							<td class="text-info">BLOQUE I</td>
+						<?php endif; ?>
+						<?php if ($cont == 2): ?>
+							<td class="text-info">BLOQUE II</td>
+						<?php endif ?>
+						<?php if ($cont == 3): ?>
+							<td class="text-info">BLOQUE III</td>
+						<?php endif ?>
+						<?php if ($cont == 4): ?>
+							<td class="text-info">BLOQUE IV</td>
+						<?php endif ?>
+						<?php if ($cont == 5): ?>
+							<td class="text-info">BLOQUE V</td>
+						<?php endif ?>
+						<td> <input type="text" class="form-control datepicker" name="fechainiciom[]" required="required" placeholder="Fecha de Inicio" value="<?php echo $value['fecha_inicio_madurez'] ?>"> </td>
+						<td> <input type="text" class="form-control datepicker" name="fechafinm[]" required="required" placeholder="Fecha de Inicio" value="<?php echo $value['fecha_final_madurez'] ?>"> </td>
 					</tr>
 					<?php $cont++; ?>
 				<?php endforeach ?>
@@ -50,7 +85,7 @@
 	<div class="form-group">
 		<div class="col-sm-offset-2 col-sm-10">
 			 <?php echo validation_errors(); ?>
-		</div>	
+		</div>
 	</div>
 
 	<div class="form-group">

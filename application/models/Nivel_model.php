@@ -10,7 +10,7 @@ class Nivel_model extends CI_Model {
 		$query = $this->db->get_where('NIVEL', array('estado_nivel'=>true));
 		return $query->result_array();
 	}
-	
+
 
 	public function getNivel2()//funcion que obtiene todos los niveles menos el de diversificado
 	{
@@ -57,6 +57,16 @@ class Nivel_model extends CI_Model {
 	public function deleteNivel($nivel, $estado)
 	{
 		$this->db->query('call eliminar_nivel('.$nivel.', "'.$estado.'");');
+	}
+
+	/*Metodo para obtener el nombre del nivel por du ID*/
+	public function getNombreNivel($id)
+	{
+		$this->db->select('n.nombre_nivel');
+		$this->db->from('NIVEL n');
+		$this->db->where('n.id_nivel', $id);
+		$query = $this->db->get();
+		return $query->result_array();
 	}
 }
 

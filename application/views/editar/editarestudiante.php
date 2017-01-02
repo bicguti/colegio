@@ -1,9 +1,10 @@
 <h1 class="text-center">Editar Estudiante</h1>
+<h2 class="text-center">Primaria - Básico</h2>
 <p class="text-info">Todos los campos con (*) son obligatorios</p>
 <?php echo form_open('', array('class'=>'form-horizontal', 'role'=>'form')); ?>
-<div class="panel panel-danger">
+<div class="panel panel-success">
     <div class="panel-heading">
-        <h3 class="panel-title">EDITAR DATOS ESTUDIANTE</h3>
+        <h3 class="panel-title">SELECCIONAR NOMINA</h3>
     </div>
     <div class="panel-body">
 	<div class="form-group">
@@ -69,4 +70,83 @@
 		</div>
 
 	</div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="frm-editEst" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">EDITAR DATOS ESTUDIANTE</h4>
+      </div>
+      <div class="modal-body">
+        <!-- Contenido del cuerpo de la ventana modal -->
+        <!-- ######################################## -->
+
+        <form class="form-horizontal" action="" method="put">
+          <p class="text-info">
+            Nota: todos los campos con (*) son obligatorios.
+          </p>
+        <div class="form-group">
+          <label for="" class="col-sm-2 control-label">Nombres*</label>
+          <div class="col-sm-10">
+              <?php echo form_input('nombres', '', array('class'=>'form-control', 'required')); ?>
+          </div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="col-sm-2 control-label">Apellidos*</label>
+            <div class="col-sm-10">
+                <?php echo form_input('apellidos', '', array('class'=>'form-control', 'required')); ?>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="col-sm-2 control-label">Código</label>
+            <div class="col-sm-10">
+                <?php echo form_input('codigo', '', array('class'=>'form-control')); ?>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="col-sm-2 control-label">CUI Estudiante</label>
+            <div class="col-sm-10">
+                <?php echo form_input('CUI', '', array('class'=>'form-control')); ?>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="col-sm-2 control-label">Fecha Nacimiento*</label>
+            <div class="col-sm-10">
+                <?php echo form_input('fecha_nacimiento', '', array('class'=>'form-control datepicker', 'required')); ?>
+            </div>
+        </div>
+
+        <div class="form-group">
+          <label for="genero" class="col-sm-2 control-label">Genero*</label>
+          <div class="col-sm-offset-2 col-sm-10">
+
+              <label for="geneo">
+                <input type="radio" name="genero" required="required" value="1" id="Masculino"> Masculino
+              </label>
+              <label for="geneo">
+                <input type="radio" name="genero" required="required" value="2" id="Femenino"> Femenino
+              </label>
+          </div>
+        </div>
+        <div id="idEst">
+
+        </div>
+        </form>
+        <!-- Fin del Contenido del cuerpo de la ventana modal -->
+        <!-- ######################################## -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+        <button type="submit" class="btn btn-primary" id="save-editEst"> Guardar Cambios</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal -->
 </div>

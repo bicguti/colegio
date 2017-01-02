@@ -7,7 +7,15 @@ class Bloque_model extends CI_Model {
 		$query = $this->db->get('BLOQUE');
 		return $query->result_array();
 	}
-	
+
+	/*
+		metodo para obtener todos los bloques de básico ṕor madurez
+	*/
+	public function getBloquesM()
+	{
+		$query = $this->db->get('BLOQUE_MADUREZ');
+		return $query->result_array();
+	}
 
 }
 

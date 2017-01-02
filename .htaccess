@@ -3,10 +3,10 @@ AddHandler application/x-httpd-php54 .php
 
 <IfModule mod_rewrite.c>
     RewriteEngine On 
-    RewriteCond %{REQUEST_FILENAME} !-f 
-    RewriteCond %{REQUEST_FILENAME} !-d 
-    RewriteRule ^(.*)$ /colegio/index.php/$1 [L] 
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ /colegio/index.php/$1 [L]
 </IfModule>
 <IfModule !mod_rewrite.c>
-    ErrorDocument 404 /colegio/index.php 
+    ErrorDocument 404 /colegio/index.php
 </IfModule>

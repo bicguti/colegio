@@ -31,6 +31,24 @@ class Puntos_model extends CI_Model {
 	}
 
 	/*
+		Metodo que busca el identificador de los cuadro que han sido creados para el nivel
+		básico madurez
+	*/
+	public function findIdCuadrosM($asigarea, $fecha, $anio)
+	{
+		$this->db->select('c.id_cuadros_madurez');
+		$this->db->from('CUADROS_MADUREZ c');
+		$this->db->join('BLOQUE_MADUREZ b', 'c.id_bloque_madurez = b.id_bloque_madurez', 'inner');
+		$this->db->join('FECHA_DISPONIBLE_MADUREZ fd', 'b.id_bloque_madurez = fd.id_bloque_madurez', 'inner');
+		$this->db->where('c.id_asignacion_area', $asigarea);
+		$this->db->where('fd.fecha_inicio_madurez <=', $fecha);
+		$this->db->where('fd.fecha_final_madurez >=', $fecha);
+		$this->db->where('c.ciclo_academico', $anio);
+		$query = $this->db->get();
+		return $query->result_array();
+	}
+
+	/*
 		Metodo que busca el identificador de los cuadros que han sido creados para el nivel
 		diversificado
 	*/
@@ -62,6 +80,24 @@ class Puntos_model extends CI_Model {
 		$this->db->where('c.id_asignacion_area', $asigarea);
 		$this->db->where('fd.fecha_inicio <=', $fecha);
 		$this->db->where('fd.fecha_final >=', $fecha);
+		$query = $this->db->get();
+		return $query->result_array();
+	}
+
+	/*
+	*  Metodo que busca si existe en la tabla PUNTOS_MADUREZ si ya fue creado los puntos
+	* esto es para el nivel básico madurez
+	*/
+	public function existe_notasM($asigarea, $fecha)
+	{
+		$this->db->select('*');
+		$this->db->from('CUADROS_MADUREZ c');
+		$this->db->join('PUNTOS_MADUREZ p', 'c.id_cuadros_madurez = p.id_cuadros_madurez', 'inner');
+		$this->db->join('BLOQUE_MADUREZ b', 'c.id_bloque_madurez = b.id_bloque_madurez', 'inner');
+		$this->db->join('FECHA_DISPONIBLE_MADUREZ fd', 'b.id_bloque_madurez = fd.id_bloque_madurez', 'inner');
+		$this->db->where('c.id_asignacion_area', $asigarea);
+		$this->db->where('fd.fecha_inicio_madurez <=', $fecha);
+		$this->db->where('fd.fecha_final_madurez >=', $fecha);
 		$query = $this->db->get();
 		return $query->result_array();
 	}
@@ -106,6 +142,14 @@ class Puntos_model extends CI_Model {
 	}
 
 	/*
+		crea la asignacion de puntos para el básico madurez.
+	*/
+	public function setNuevosPuntosM($cuadro, $acreditacion)
+	{
+		$this->db->query('call nuevos_puntosM('.$cuadro.', '.$acreditacion.');');
+	}
+
+	/*
 		Crea la asignacon de puntos para el nivel diversificado
 	*/
 	public function setNuevosPuntosC($cuadro, $acreditacion)
@@ -120,6 +164,15 @@ class Puntos_model extends CI_Model {
 	public function agregar_puntos($idPuntos, $puntos)
 	{
 		$this->db->query('call agregar_puntos('.$idPuntos.', '.$puntos.');');
+	}
+
+	/*
+		actualiza los puntos del estudiante en un determinado bloque y area
+		del nivel básico madurez
+	*/
+	public function agregar_puntosM($idPuntos, $puntos)
+	{
+		$this->db->query('call agregar_puntosM('.$idPuntos.', '.$puntos.');');
 	}
 
 	/*
@@ -147,6 +200,26 @@ class Puntos_model extends CI_Model {
 		$this->db->where('c.ciclo_academico', $ciclo);
 		$this->db->where('c.id_estudiante', $estudiante);
 		$this->db->where('c.id_bloque', $bloque);
+		$query = $this->db->get();
+		return $query->result_array();
+	}
+
+	/*
+		Metodo que busca el identificador de cada punto asignado al estudiante
+		en un ciclo academico y en un determinado bloque del nivel
+		básico por madurez
+	*/
+	public function findNotasEstudianteM($asignarea, $ciclo, $estudiante, $bloque)
+	{
+		$this->db->select('p.id_puntos, ab.nombre_acreditacion, e.id_nivel, p.puntos_acreditacion');
+		$this->db->from('CUADROS_MADUREZ c');
+		$this->db->join('PUNTOS_MADUREZ p', 'c.id_cuadros_madurez = p.id_cuadros_madurez', 'inner');
+		$this->db->join('ACREDITACIONES_BLOQUE ab', 'p.id_acreditacion = ab.id_acreditacion', 'inner');
+		$this->db->join('ESTUDIANTE e', 'c.id_estudiante = e.id_estudiante', 'inner');
+		$this->db->where('c.id_asignacion_area', $asignarea);
+		$this->db->where('c.ciclo_academico', $ciclo);
+		$this->db->where('c.id_estudiante', $estudiante);
+		$this->db->where('c.id_bloque_madurez', $bloque);
 		$query = $this->db->get();
 		return $query->result_array();
 	}
@@ -180,6 +253,15 @@ class Puntos_model extends CI_Model {
 	public function update_punt_habitos($cuadro, $puntualidad, $habitos)
 	{
 		$this->db->query('call nueva_punt_habitos('.$cuadro.', "'.$puntualidad.'", "'.$habitos.'");');
+	}
+
+	/*
+		metodo para editar los registros de puntualidad y habitos de un estudiante
+		de nivel básico por madurez
+	*/
+	public function update_punt_habitosM($cuadro, $puntualidad, $habitos)
+	{
+		$this->db->query('call nueva_punt_habitosM('.$cuadro.', "'.$puntualidad.'", "'.$habitos.'");');
 	}
 
 	/*

@@ -17,7 +17,7 @@
 			</select>
 		</div>
 	</div>
-	
+
 	<div class="form-group" id="fg-carrera" style="display: none;">
 		<?php echo form_label('Carrera*', 'carrera', array('class'=>'col-sm-2 control-label')); ?>
 		<div class="col-sm-10">
@@ -47,7 +47,7 @@
 			</select>
 		</div>
 	</div>
-	
+
 	<div class="form-group">
 		<div class="col-sm-offset-2 col-sm-10 text-danger">
 			<?php echo validation_errors(); ?>

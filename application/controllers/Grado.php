@@ -9,7 +9,7 @@ class Grado extends CI_Controller {
 	}
 	public function index()
 	{
-		
+
 	}
 
 	public function buscar_grados()
@@ -34,6 +34,10 @@ class Grado extends CI_Controller {
 				echo json_encode($dato);
 				break;
 			case 5:
+				$dato = $this->Grado_model->findMadurez();
+				echo json_encode($dato);
+				break;
+			case 6:
 				$dato = $this->Grado_model->findDiversificado2();
 				echo json_encode($dato);
 				break;
